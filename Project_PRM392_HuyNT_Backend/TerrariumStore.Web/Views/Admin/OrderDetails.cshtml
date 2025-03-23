@@ -1,0 +1,354 @@
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Products">
+                            <i class="fas fa-box"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" asp-controller="Admin" asp-action="Orders">
+                            <i class="fas fa-shopping-cart"></i> Đơn hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Users">
+                            <i class="fas fa-users"></i> Người dùng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Categories">
+                            <i class="fas fa-tags"></i> Danh mục
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Payments">
+                            <i class="fas fa-money-bill-wave"></i> Thanh toán
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Transactions">
+                            <i class="fas fa-exchange-alt"></i> Giao dịch
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Chi tiết đơn hàng #<span id="orderIdDisplay"></span></h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-outline-secondary me-2" onclick="window.location.href='/Admin/Orders'">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                    <button type="button" class="btn btn-primary" id="updateStatusBtn">
+                        <i class="fas fa-edit"></i> Cập nhật trạng thái
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Info -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Thông tin đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 40%">Mã đơn hàng:</th>
+                                        <td id="orderId"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ngày đặt:</th>
+                                        <td id="orderDate"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Trạng thái:</th>
+                                        <td id="orderStatus"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tổng tiền:</th>
+                                        <td id="totalPrice"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Thông tin khách hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 40%">Tên khách hàng:</th>
+                                        <td id="customerName"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Email:</th>
+                                        <td id="customerEmail"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Địa chỉ giao hàng:</th>
+                                        <td id="shippingAddress"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sản phẩm đã đặt</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderItems">
+                                <!-- Order items will be loaded here -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Tổng cộng:</th>
+                                    <th class="text-end" id="orderTotal"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Order Status Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Cập nhật trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <div class="mb-3">
+                        <label for="orderStatusSelect" class="form-label">Trạng thái</label>
+                        <select class="form-select" id="orderStatusSelect" required>
+                            <option value="Pending">Chờ xử lý</option>
+                            <option value="Processing">Đang xử lý</option>
+                            <option value="Shipped">Đã giao hàng</option>
+                            <option value="Delivered">Đã nhận hàng</option>
+                            <option value="Cancelled">Đã hủy</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="saveStatusBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Kiểm tra token và role
+            var token = localStorage.getItem("token");
+            var role = localStorage.getItem("role");
+
+            if (!token || role !== "Admin") {
+                window.location.href = "/Home/Login";
+                return;
+            }
+
+            // Get order ID from URL
+            const orderId = @ViewBag.OrderId;
+            
+            // Load order details
+            loadOrderDetails(orderId);
+
+            // Update status button click
+            $("#updateStatusBtn").click(function() {
+                openStatusModal();
+            });
+
+            // Save status button click
+            $("#saveStatusBtn").click(function() {
+                updateOrderStatus(orderId);
+            });
+        });
+
+        function loadOrderDetails(orderId) {
+            const token = localStorage.getItem("token");
+            
+            $.ajax({
+                url: `https://localhost:7024/api/admin/orders/${orderId}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(order) {
+                    // Display order ID in title
+                    $("#orderIdDisplay").text(order.id);
+                    
+                    // Fill order info
+                    $("#orderId").text(order.id);
+                    $("#orderDate").text(new Date(order.orderDate).toLocaleString());
+                    
+                    const statusClass = getStatusClass(order.status);
+                    $("#orderStatus").html(`<span class="badge ${statusClass}">${getStatusText(order.status)}</span>`);
+                    
+                    $("#totalPrice").text(order.totalPrice.toLocaleString() + "đ");
+                    
+                    // Fill customer info
+                    $("#customerName").text(order.customerName);
+                    $("#customerEmail").text(order.customerEmail);
+                    $("#shippingAddress").text(order.shippingAddress || "Không có");
+                    
+                    // Fill order items
+                    const tbody = $("#orderItems");
+                    tbody.empty();
+                    
+                    order.items.forEach(item => {
+                        const subtotal = item.price * item.quantity;
+                        tbody.append(`
+                            <tr>
+                                <td>${item.productName}</td>
+                                <td>${item.price.toLocaleString()}đ</td>
+                                <td>${item.quantity}</td>
+                                <td class="text-end">${subtotal.toLocaleString()}đ</td>
+                            </tr>
+                        `);
+                    });
+                    
+                    // Set order total
+                    $("#orderTotal").text(order.totalPrice.toLocaleString() + "đ");
+                    
+                    // Set current status in modal
+                    $("#orderStatusSelect").val(order.status);
+                },
+                error: function(xhr) {
+                    console.error("Error loading order details:", xhr);
+                    alert("Không thể tải thông tin đơn hàng. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function openStatusModal() {
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('statusModal'));
+            modal.show();
+        }
+
+        function updateOrderStatus(orderId) {
+            const token = localStorage.getItem("token");
+            const status = $("#orderStatusSelect").val();
+            
+            $.ajax({
+                url: `https://localhost:7024/api/admin/orders/${orderId}/status`,
+                method: "PUT",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({ status: status }),
+                success: function() {
+                    // Close modal
+                    $("#statusModal").modal("hide");
+                    
+                    // Reload order details
+                    loadOrderDetails(orderId);
+                    
+                    // Show success message
+                    alert("Trạng thái đơn hàng đã được cập nhật thành công!");
+                },
+                error: function(xhr) {
+                    console.error("Error updating order status:", xhr);
+                    alert("Không thể cập nhật trạng thái đơn hàng. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case "Pending": return "bg-warning";
+                case "Processing": return "bg-info";
+                case "Shipped": return "bg-primary";
+                case "Delivered": return "bg-success";
+                case "Cancelled": return "bg-danger";
+                default: return "bg-secondary";
+            }
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case "Pending": return "Chờ xử lý";
+                case "Processing": return "Đang xử lý";
+                case "Shipped": return "Đã giao hàng";
+                case "Delivered": return "Đã nhận hàng";
+                case "Cancelled": return "Đã hủy";
+                default: return status;
+            }
+        }
+    </script>
+}
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #fff;
+    padding: .5rem 1rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+}
+</style> 

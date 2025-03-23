@@ -1,0 +1,275 @@
+@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+
+<div class="container mt-4">
+    <h2>Giỏ hàng của bạn</h2>
+    <div id="cartContent">
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Đang tải giỏ hàng...</p>
+        </div>
+    </div>
+
+    <div id="emptyCart" style="display: none;">
+        <div class="alert alert-info">
+            Giỏ hàng của bạn đang trống. <a href="/" class="alert-link">Tiếp tục mua sắm</a>
+        </div>
+    </div>
+
+    <div id="cartItems" style="display: none;">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="cartItemsList">
+                    <!-- Cart items will be loaded here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                        <td id="cartTotal" class="fw-bold"></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Thông tin giao hàng</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="shippingAddress" class="form-label">Địa chỉ giao hàng</label>
+                    <textarea id="shippingAddress" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng của bạn"></textarea>
+                    <div class="form-text">Vui lòng nhập địa chỉ đầy đủ để chúng tôi có thể giao hàng chính xác.</div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="useProfileAddress">
+                    <label class="form-check-label" for="useProfileAddress">
+                        Sử dụng địa chỉ từ thông tin cá nhân
+                    </label>
+                </div>
+                <div id="profileAddressDisplay" class="alert alert-secondary" style="display: none;">
+                    <strong>Địa chỉ từ thông tin cá nhân:</strong> <span id="userAddress"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Tiếp tục mua sắm
+            </a>
+            <button id="checkoutBtn" class="btn btn-success">
+                <i class="fas fa-shopping-cart"></i> Thanh toán
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Kiểm tra token và thông tin người dùng
+            var token = localStorage.getItem("token");
+            var userId = localStorage.getItem("userId");
+            
+            if (!token || !userId) {
+                window.location.href = "/Home/Login";
+                return;
+            }
+            
+            // Tải giỏ hàng
+            loadCart();
+            
+            // Tải thông tin người dùng để lấy địa chỉ
+            loadUserInfo();
+            
+            // Sự kiện khi chọn sử dụng địa chỉ từ thông tin cá nhân
+            $("#useProfileAddress").change(function() {
+                if ($(this).is(":checked")) {
+                    var userAddress = $("#userAddress").text();
+                    $("#shippingAddress").val(userAddress);
+                    $("#profileAddressDisplay").show();
+                } else {
+                    $("#profileAddressDisplay").hide();
+                }
+            });
+            
+            // Sự kiện khi nhấn nút thanh toán
+            $("#checkoutBtn").click(function() {
+                checkout();
+            });
+        });
+        
+        function loadCart() {
+            var token = localStorage.getItem("token");
+            var userId = localStorage.getItem("userId");
+            
+            $.ajax({
+                url: `https://localhost:7024/api/Cart/${userId}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(response) {
+                    displayCart(response);
+                },
+                error: function(xhr) {
+                    console.error("Error loading cart:", xhr);
+                    $("#cartContent").html(`
+                        <div class="alert alert-danger">
+                            Không thể tải giỏ hàng. Vui lòng thử lại sau.
+                        </div>
+                    `);
+                }
+            });
+        }
+        
+        function loadUserInfo() {
+            var token = localStorage.getItem("token");
+            var userId = localStorage.getItem("userId");
+            
+            $.ajax({
+                url: `https://localhost:7024/api/User/${userId}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(user) {
+                    if (user.address) {
+                        $("#userAddress").text(user.address);
+                        $("#profileAddressDisplay").show();
+                    } else {
+                        $("#userAddress").text("Chưa có địa chỉ");
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error loading user info:", xhr);
+                }
+            });
+        }
+        
+        function displayCart(cart) {
+            $("#cartContent").hide();
+            
+            if (!cart.cartItems || cart.cartItems.length === 0) {
+                $("#emptyCart").show();
+                return;
+            }
+            
+            var totalPrice = 0;
+            var cartItemsHtml = "";
+            
+            cart.cartItems.forEach(function(item) {
+                var itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+                
+                cartItemsHtml += `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>
+                            <div class="input-group input-group-sm" style="width: 120px;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(${item.productId}, ${item.quantity - 1})">-</button>
+                                <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(${item.productId}, ${item.quantity + 1})">+</button>
+                            </div>
+                        </td>
+                        <td>${formatCurrency(itemTotal)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="removeItem(${item.productId})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            $("#cartItemsList").html(cartItemsHtml);
+            $("#cartTotal").text(formatCurrency(totalPrice));
+            $("#cartItems").show();
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+        
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeItem(productId);
+                return;
+            }
+            
+            var token = localStorage.getItem("token");
+            var userId = localStorage.getItem("userId");
+            
+            $.ajax({
+                url: "https://localhost:7024/api/Cart/add",
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({
+                    userId: parseInt(userId),
+                    productId: productId,
+                    quantity: newQuantity,
+                    price: 0 // Giá sẽ được lấy từ server
+                }),
+                success: function() {
+                    loadCart();
+                },
+                error: function(xhr) {
+                    console.error("Error updating quantity:", xhr);
+                    alert("Không thể cập nhật số lượng. Vui lòng thử lại sau.");
+                }
+            });
+        }
+        
+        function removeItem(productId) {
+            // Implement remove item functionality
+            // This would require an API endpoint to remove an item from the cart
+            alert("Chức năng xóa sản phẩm chưa được triển khai.");
+        }
+        
+        function checkout() {
+            var token = localStorage.getItem("token");
+            var userId = localStorage.getItem("userId");
+            var shippingAddress = $("#shippingAddress").val();
+            
+            if (!shippingAddress) {
+                alert("Vui lòng nhập địa chỉ giao hàng.");
+                return;
+            }
+            
+            // Sử dụng API endpoint mới với địa chỉ giao hàng
+            $.ajax({
+                url: "https://localhost:7024/api/Cart/checkout",
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({
+                    userId: parseInt(userId),
+                    shippingAddress: shippingAddress
+                }),
+                success: function(response) {
+                    alert("Đặt hàng thành công!");
+                    window.location.href = "/"; // Chuyển về trang chủ sau khi đặt hàng
+                },
+                error: function(xhr) {
+                    console.error("Error during checkout:", xhr);
+                    alert("Không thể thanh toán: " + (xhr.responseText || "Vui lòng thử lại sau."));
+                }
+            });
+        }
+    </script>
+} 

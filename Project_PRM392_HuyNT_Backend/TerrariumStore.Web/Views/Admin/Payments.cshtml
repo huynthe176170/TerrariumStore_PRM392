@@ -1,0 +1,641 @@
+@{
+    ViewData["Title"] = "Quản lý thanh toán";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Tổng quan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Products">
+                            <i class="fas fa-box"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Orders">
+                            <i class="fas fa-shopping-cart"></i> Đơn hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Users">
+                            <i class="fas fa-users"></i> Người dùng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Categories">
+                            <i class="fas fa-tags"></i> Danh mục
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" asp-controller="Admin" asp-action="Payments">
+                            <i class="fas fa-money-bill-wave"></i> Thanh toán
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Admin" asp-action="Transactions">
+                            <i class="fas fa-exchange-alt"></i> Giao dịch
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Quản lý thanh toán</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-success" onclick="createPayment()">
+                        <i class="fas fa-plus"></i> Tạo thanh toán mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter and Search -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <select id="paymentStatusFilter" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="true">Đã thanh toán</option>
+                        <option value="false">Chưa thanh toán</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="paymentMethodFilter" class="form-select">
+                        <option value="">Tất cả phương thức</option>
+                        <option value="VNPAY">VNPAY</option>
+                        <option value="Momo">Momo</option>
+                        <option value="Cash">Tiền mặt</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm theo mã đơn hàng...">
+                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button id="resetFilters" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-redo"></i> Đặt lại
+                    </button>
+                </div>
+            </div>
+
+            <!-- Payments Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã đơn hàng</th>
+                            <th>Phương thức</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày thanh toán</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTable">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Thông tin thanh toán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    <input type="hidden" id="paymentId" value="0">
+                    <div class="mb-3">
+                        <label for="orderId" class="form-label">Mã đơn hàng</label>
+                        <select class="form-select" id="orderId" required>
+                            <option value="">Chọn đơn hàng</option>
+                            <!-- Orders will be loaded here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
+                        <select class="form-select" id="paymentMethod" required>
+                            <option value="">Chọn phương thức</option>
+                            <option value="VNPAY">VNPAY</option>
+                            <option value="Momo">Momo</option>
+                            <option value="Cash">Tiền mặt</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="isPaid">
+                        <label class="form-check-label" for="isPaid">Đã thanh toán</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="savePaymentBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transactionModalLabel">Giao dịch của thanh toán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Thông tin thanh toán</h6>
+                    <p><strong>Mã đơn hàng:</strong> <span id="transactionOrderId"></span></p>
+                    <p><strong>Phương thức:</strong> <span id="transactionPaymentMethod"></span></p>
+                    <p><strong>Trạng thái:</strong> <span id="transactionPaymentStatus"></span></p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h6>Danh sách giao dịch</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Mã giao dịch</th>
+                                    <th>Số tiền</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTable">
+                                <!-- Transactions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h6>Thêm giao dịch mới</h6>
+                    <form id="transactionForm">
+                        <input type="hidden" id="transactionPaymentId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="transactionId" class="form-label">Mã giao dịch</label>
+                                <input type="text" class="form-control" id="transactionId" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="amount" class="form-label">Số tiền</label>
+                                <input type="number" class="form-control" id="amount" required>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addTransactionBtn">Thêm giao dịch</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Kiểm tra token và role
+            var token = localStorage.getItem("token");
+            var role = localStorage.getItem("role");
+
+            if (!token || role !== "Admin") {
+                window.location.href = "/Home/Login";
+                return;
+            }
+
+            // Load payments
+            loadPayments();
+            
+            // Event handlers
+            $("#paymentStatusFilter, #paymentMethodFilter").change(function() {
+                filterPayments();
+            });
+            
+            $("#searchButton").click(function() {
+                filterPayments();
+            });
+            
+            $("#searchInput").keypress(function(e) {
+                if (e.which === 13) {
+                    filterPayments();
+                }
+            });
+            
+            $("#resetFilters").click(function() {
+                $("#paymentStatusFilter").val("");
+                $("#paymentMethodFilter").val("");
+                $("#searchInput").val("");
+                loadPayments();
+            });
+            
+            $("#savePaymentBtn").click(function() {
+                savePayment();
+            });
+            
+            $("#addTransactionBtn").click(function() {
+                addTransaction();
+            });
+        });
+
+        function loadPayments() {
+            const token = localStorage.getItem("token");
+            
+            // Show loading indicator
+            $("#paymentsTable").html('<tr><td colspan="6" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+            
+            $.ajax({
+                url: "https://localhost:7024/api/Payment",
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(payments) {
+                    displayPayments(payments);
+                },
+                error: function(xhr) {
+                    console.error("Error loading payments:", xhr);
+                    $("#paymentsTable").html('<tr><td colspan="6" class="text-center text-danger">Không thể tải danh sách thanh toán. Vui lòng thử lại sau.</td></tr>');
+                }
+            });
+        }
+
+        function displayPayments(payments) {
+            const tbody = $("#paymentsTable");
+            tbody.empty();
+            
+            if (payments.length === 0) {
+                tbody.append('<tr><td colspan="6" class="text-center">Không có thanh toán nào</td></tr>');
+                return;
+            }
+            
+            payments.forEach(payment => {
+                const statusBadge = payment.isPaid 
+                    ? '<span class="badge bg-success">Đã thanh toán</span>' 
+                    : '<span class="badge bg-warning text-dark">Chưa thanh toán</span>';
+                
+                const paymentDate = payment.paymentDate 
+                    ? new Date(payment.paymentDate).toLocaleString() 
+                    : 'Chưa thanh toán';
+                
+                tbody.append(`
+                    <tr>
+                        <td>${payment.id}</td>
+                        <td>${payment.orderId}</td>
+                        <td>${payment.paymentMethod}</td>
+                        <td>${statusBadge}</td>
+                        <td>${paymentDate}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="editPayment(${payment.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="viewTransactions(${payment.id})">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePayment(${payment.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function filterPayments() {
+            const token = localStorage.getItem("token");
+            const statusFilter = $("#paymentStatusFilter").val();
+            const methodFilter = $("#paymentMethodFilter").val();
+            const searchTerm = $("#searchInput").val().toLowerCase();
+            
+            // Show loading indicator
+            $("#paymentsTable").html('<tr><td colspan="6" class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+            
+            $.ajax({
+                url: "https://localhost:7024/api/Payment",
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(payments) {
+                    // Filter payments
+                    let filteredPayments = payments;
+                    
+                    if (statusFilter) {
+                        const isPaid = statusFilter === "true";
+                        filteredPayments = filteredPayments.filter(p => p.isPaid === isPaid);
+                    }
+                    
+                    if (methodFilter) {
+                        filteredPayments = filteredPayments.filter(p => p.paymentMethod === methodFilter);
+                    }
+                    
+                    if (searchTerm) {
+                        filteredPayments = filteredPayments.filter(p => 
+                            p.orderId.toString().includes(searchTerm)
+                        );
+                    }
+                    
+                    displayPayments(filteredPayments);
+                },
+                error: function(xhr) {
+                    console.error("Error filtering payments:", xhr);
+                    $("#paymentsTable").html('<tr><td colspan="6" class="text-center text-danger">Không thể lọc danh sách thanh toán. Vui lòng thử lại sau.</td></tr>');
+                }
+            });
+        }
+
+        function createPayment() {
+            // Reset form
+            $("#paymentForm")[0].reset();
+            $("#paymentId").val(0);
+            $("#paymentModalLabel").text("Tạo thanh toán mới");
+            
+            // Load orders for dropdown
+            loadOrdersForDropdown();
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            modal.show();
+        }
+
+        function loadOrdersForDropdown() {
+            const token = localStorage.getItem("token");
+            
+            $.ajax({
+                url: "https://localhost:7024/api/Order",
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(orders) {
+                    const orderSelect = $("#orderId");
+                    orderSelect.find('option:not(:first)').remove();
+                    
+                    orders.forEach(order => {
+                        orderSelect.append(`<option value="${order.id}">Đơn hàng #${order.id} - ${order.totalPrice.toLocaleString('vi-VN')} VND</option>`);
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Error loading orders:", xhr);
+                    alert("Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function editPayment(id) {
+            const token = localStorage.getItem("token");
+            
+            $.ajax({
+                url: `https://localhost:7024/api/Payment/${id}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(payment) {
+                    // Fill form with payment data
+                    $("#paymentId").val(payment.id);
+                    loadOrdersForDropdown();
+                    
+                    // Set values after dropdown is loaded
+                    setTimeout(() => {
+                        $("#orderId").val(payment.orderId);
+                        $("#paymentMethod").val(payment.paymentMethod);
+                        $("#isPaid").prop("checked", payment.isPaid);
+                    }, 500);
+                    
+                    // Update modal title
+                    $("#paymentModalLabel").text("Chỉnh sửa thanh toán");
+                    
+                    // Show modal
+                    var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                    modal.show();
+                },
+                error: function(xhr) {
+                    console.error("Error loading payment details:", xhr);
+                    alert("Không thể tải thông tin thanh toán. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function savePayment() {
+            const token = localStorage.getItem("token");
+            const paymentId = $("#paymentId").val();
+            
+            // Validate form
+            if (!$("#orderId").val() || !$("#paymentMethod").val()) {
+                alert("Vui lòng điền đầy đủ thông tin.");
+                return;
+            }
+            
+            const paymentData = {
+                id: paymentId != 0 ? parseInt(paymentId) : 0,
+                orderId: parseInt($("#orderId").val()),
+                paymentMethod: $("#paymentMethod").val(),
+                isPaid: $("#isPaid").is(":checked"),
+                paymentDate: $("#isPaid").is(":checked") ? new Date().toISOString() : null
+            };
+            
+            const method = paymentId != 0 ? "PUT" : "POST";
+            const url = paymentId != 0 ? `https://localhost:7024/api/Payment/${paymentId}` : "https://localhost:7024/api/Payment";
+            
+            $.ajax({
+                url: url,
+                method: method,
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify(paymentData),
+                success: function() {
+                    // Close modal
+                    $("#paymentModal").modal("hide");
+                    
+                    // Reload payments
+                    loadPayments();
+                    
+                    // Show success message
+                    alert(paymentId != 0 ? "Thanh toán đã được cập nhật thành công!" : "Thanh toán đã được tạo thành công!");
+                },
+                error: function(xhr) {
+                    console.error("Error saving payment:", xhr);
+                    alert("Không thể lưu thanh toán. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function deletePayment(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa thanh toán này không?")) {
+                const token = localStorage.getItem("token");
+                
+                $.ajax({
+                    url: `https://localhost:7024/api/Payment/${id}`,
+                    method: "DELETE",
+                    headers: { "Authorization": `Bearer ${token}` },
+                    success: function() {
+                        // Reload payments
+                        loadPayments();
+                        
+                        // Show success message
+                        alert("Thanh toán đã được xóa thành công!");
+                    },
+                    error: function(xhr) {
+                        console.error("Error deleting payment:", xhr);
+                        alert("Không thể xóa thanh toán. Vui lòng thử lại sau.");
+                    }
+                });
+            }
+        }
+
+        function viewTransactions(paymentId) {
+            const token = localStorage.getItem("token");
+            
+            // Load payment details
+            $.ajax({
+                url: `https://localhost:7024/api/Payment/${paymentId}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(payment) {
+                    // Fill payment info
+                    $("#transactionOrderId").text(payment.orderId);
+                    $("#transactionPaymentMethod").text(payment.paymentMethod);
+                    $("#transactionPaymentStatus").text(payment.isPaid ? "Đã thanh toán" : "Chưa thanh toán");
+                    $("#transactionPaymentId").val(payment.id);
+                    
+                    // Load transactions
+                    loadTransactions(paymentId);
+                    
+                    // Show modal
+                    var modal = new bootstrap.Modal(document.getElementById('transactionModal'));
+                    modal.show();
+                },
+                error: function(xhr) {
+                    console.error("Error loading payment details:", xhr);
+                    alert("Không thể tải thông tin thanh toán. Vui lòng thử lại sau.");
+                }
+            });
+        }
+
+        function loadTransactions(paymentId) {
+            const token = localStorage.getItem("token");
+            
+            // Show loading indicator
+            $("#transactionsTable").html('<tr><td colspan="4" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+            
+            $.ajax({
+                url: `https://localhost:7024/api/Transaction/payment/${paymentId}`,
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+                success: function(transactions) {
+                    const tbody = $("#transactionsTable");
+                    tbody.empty();
+                    
+                    if (transactions.length === 0) {
+                        tbody.append('<tr><td colspan="4" class="text-center">Không có giao dịch nào</td></tr>');
+                        return;
+                    }
+                    
+                    transactions.forEach(transaction => {
+                        tbody.append(`
+                            <tr>
+                                <td>${transaction.id}</td>
+                                <td>${transaction.transactionId}</td>
+                                <td>${transaction.amount.toLocaleString('vi-VN')} VND</td>
+                                <td>${new Date(transaction.createdAt).toLocaleString()}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Error loading transactions:", xhr);
+                    $("#transactionsTable").html('<tr><td colspan="4" class="text-center text-danger">Không thể tải danh sách giao dịch. Vui lòng thử lại sau.</td></tr>');
+                }
+            });
+        }
+
+        function addTransaction() {
+            const token = localStorage.getItem("token");
+            const paymentId = $("#transactionPaymentId").val();
+            const transactionId = $("#transactionId").val();
+            const amount = $("#amount").val();
+            
+            // Validate form
+            if (!transactionId || !amount) {
+                alert("Vui lòng điền đầy đủ thông tin giao dịch.");
+                return;
+            }
+            
+            const transactionData = {
+                paymentId: parseInt(paymentId),
+                transactionId: transactionId,
+                amount: parseFloat(amount)
+            };
+            
+            $.ajax({
+                url: "https://localhost:7024/api/Transaction",
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify(transactionData),
+                success: function() {
+                    // Reset form
+                    $("#transactionId").val("");
+                    $("#amount").val("");
+                    
+                    // Reload transactions
+                    loadTransactions(paymentId);
+                    
+                    // Show success message
+                    alert("Giao dịch đã được thêm thành công!");
+                },
+                error: function(xhr) {
+                    console.error("Error adding transaction:", xhr);
+                    alert("Không thể thêm giao dịch. Vui lòng thử lại sau.");
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #fff;
+    padding: .5rem 1rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+}
+</style> 

@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h2>Chào mừng đến với Terrarium Store!</h2>
+<p>Xin chào, <strong id="usernameDisplay"></strong>!</p>
+<p>Vai trò: <strong id="roleDisplay"></strong></p>
+
+<div class="mt-4">
+    <a href="/Home/Cart" class="btn btn-primary">
+        <i class="fas fa-shopping-cart"></i> Xem giỏ hàng
+    </a>
+    <a href="/Home/Logout" class="btn btn-danger">
+        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Kiểm tra token và thông tin người dùng
+            var token = localStorage.getItem("token");
+            var role = localStorage.getItem("role");
+            var username = localStorage.getItem("username");
+
+            if (!token) {
+                window.location.href = "/Home/Login";
+                return;
+            }
+
+            // Hiển thị thông tin người dùng
+            $("#usernameDisplay").text(username);
+            $("#roleDisplay").text(role);
+
+            // Chỉ cho phép Customer truy cập
+            if (role !== "Customer") {
+                window.location.href = "/Home/Login";
+            }
+        });
+    </script>
+}

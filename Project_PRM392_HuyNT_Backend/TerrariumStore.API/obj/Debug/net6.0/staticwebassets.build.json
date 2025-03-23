@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "PFc3Oln3IbqMJVyepziMkAiX56CXL6bolg5m2Afnh0Y=",
+  "Source": "TerrariumStore.API",
+  "BasePath": "_content/TerrariumStore.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
