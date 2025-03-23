@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.project_terrarium_prm392.api.ApiClient;
 import com.example.project_terrarium_prm392.api.TerrariumApiService;
 import com.example.project_terrarium_prm392.api.request.LoginRequest;
+import com.example.project_terrarium_prm392.api.request.RegisterRequest;
 import com.example.project_terrarium_prm392.api.response.AuthResponse;
 import com.example.project_terrarium_prm392.models.Cart;
 import com.example.project_terrarium_prm392.models.CartItem;
@@ -69,7 +70,17 @@ public class TerrariumRepository {
     }
     
     public void register(User user, final ApiCallback<User> callback) {
-        apiService.register(user).enqueue(new Callback<User>() {
+        // Create RegisterRequest from User object
+        RegisterRequest registerRequest = new RegisterRequest(
+            user.getUsername(), 
+            user.getPasswordHash(), 
+            user.getFullName(), 
+            user.getEmail(), 
+            user.getPhone(), 
+            user.getAddress()
+        );
+        
+        apiService.register(registerRequest).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful() && response.body() != null) {

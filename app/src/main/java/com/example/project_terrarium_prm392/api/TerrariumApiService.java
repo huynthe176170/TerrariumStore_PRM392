@@ -1,6 +1,7 @@
 package com.example.project_terrarium_prm392.api;
 
 import com.example.project_terrarium_prm392.api.request.LoginRequest;
+import com.example.project_terrarium_prm392.api.request.RegisterRequest;
 import com.example.project_terrarium_prm392.api.response.AuthResponse;
 import com.example.project_terrarium_prm392.models.Cart;
 import com.example.project_terrarium_prm392.models.CartItem;
@@ -29,7 +30,7 @@ public interface TerrariumApiService {
     Call<AuthResponse> login(@Body LoginRequest loginRequest);
     
     @POST("auth/register")
-    Call<User> register(@Body User user);
+    Call<User> register(@Body RegisterRequest registerRequest);
     
     // User endpoints
     @GET("auth/profile")
