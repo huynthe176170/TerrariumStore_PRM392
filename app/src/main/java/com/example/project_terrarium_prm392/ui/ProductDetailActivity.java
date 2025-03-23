@@ -1,5 +1,6 @@
 package com.example.project_terrarium_prm392.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -11,12 +12,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.project_terrarium_prm392.R;
+import com.example.project_terrarium_prm392.models.CartItem;
 import com.example.project_terrarium_prm392.models.Product;
 import com.example.project_terrarium_prm392.repository.TerrariumRepository;
+import com.example.project_terrarium_prm392.ui.auth.LoginActivity;
+import com.example.project_terrarium_prm392.utils.TokenManager;
 import com.squareup.picasso.Picasso;
 
 public class ProductDetailActivity extends AppCompatActivity {
@@ -32,6 +37,9 @@ public class ProductDetailActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private int productId;
+    private Product currentProduct;
+    private TokenManager tokenManager;
+    private TerrariumRepository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,10 @@ public class ProductDetailActivity extends AppCompatActivity {
             buttonAddToCart = findViewById(R.id.buttonAddToCart);
             progressBar = findViewById(R.id.progressBar);
             
+            // Initialize token manager and repository
+            tokenManager = new TokenManager(this);
+            repository = new TerrariumRepository(this);
+            
             // Get product ID from intent
             productId = getIntent().getIntExtra(EXTRA_PRODUCT_ID, -1);
             
@@ -66,28 +78,73 @@ public class ProductDetailActivity extends AppCompatActivity {
             loadProductDetails(productId);
             
             // Set up add to cart button
-            buttonAddToCart.setOnClickListener(v -> {
-                Toast.makeText(this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                // Triển khai thêm vào giỏ hàng sau
-            });
+//            buttonAddToCart.setOnClickListener(v -> {
+//                addToCart();
+//            });
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khởi tạo ProductDetailActivity: " + e.getMessage(), e);
             Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+    
+//    private void addToCart() {
+//        // Kiểm tra đăng nhập trước khi thêm vào giỏ hàng
+//        if (!tokenManager.isLoggedIn()) {
+//            // Hiển thị dialog yêu cầu đăng nhập
+//            new AlertDialog.Builder(this)
+//                .setTitle("Yêu cầu đăng nhập")
+//                .setMessage("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.")
+//                .setPositiveButton("Đăng nhập", (dialog, which) -> {
+//                    // Chuyển đến màn hình đăng nhập
+//                    Intent intent = new Intent(ProductDetailActivity.this, LoginActivity.class);
+//                    startActivity(intent);
+//                })
+//                .setNegativeButton("Hủy", null)
+//                .show();
+//            return;
+//        }
+//
+//        // Đã đăng nhập, tiếp tục thêm vào giỏ hàng
+//        if (currentProduct != null) {
+//            // Tạo CartItem object
+//            CartItem cartItem = new CartItem();
+//            cartItem.setProductId(currentProduct.getId());
+//            cartItem.setQuantity(1); // Mặc định là 1
+//
+//            progressBar.setVisibility(View.VISIBLE);
+//
+//            // Gọi API thêm vào giỏ hàng
+//            repository.addToCart(cartItem, new TerrariumRepository.RepositoryCallback<CartItem>() {
+//                @Override
+//                public void onSuccess(CartItem result) {
+//                    progressBar.setVisibility(View.GONE);
+//                    Toast.makeText(ProductDetailActivity.this, "Đã thêm " + currentProduct.getName() + " vào giỏ hàng", Toast.LENGTH_SHORT).show();
+//                }
+//
+//                @Override
+//                public void onError(Exception e) {
+//                    progressBar.setVisibility(View.GONE);
+//                    Toast.makeText(ProductDetailActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    Log.e(TAG, "Lỗi thêm vào giỏ hàng: " + e.getMessage(), e);
+//                }
+//            });
+//        } else {
+//            Toast.makeText(this, "Không thể thêm vào giỏ hàng, dữ liệu sản phẩm không có sẵn", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     private void loadProductDetails(int productId) {
         try {
             progressBar.setVisibility(View.VISIBLE);
             
             // Gọi API thực tế thay vì dữ liệu mẫu
-            TerrariumRepository repository = new TerrariumRepository(this);
             repository.getProductById(productId, new TerrariumRepository.RepositoryCallback<Product>() {
                 @Override
                 public void onSuccess(Product result) {
                     progressBar.setVisibility(View.GONE);
                     if (result != null) {
                         Log.d(TAG, "Đã nhận thông tin sản phẩm: " + result.getName());
+                        currentProduct = result;
                         displayProductDetails(result);
                     } else {
                         Toast.makeText(ProductDetailActivity.this, "Không tìm thấy thông tin sản phẩm", Toast.LENGTH_SHORT).show();
@@ -154,6 +211,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Lỗi tải hình ảnh: " + e.getMessage(), e);
             imageViewProduct.setImageResource(R.drawable.ic_launcher_background);
+        }
+        
+        // Update button state if product is out of stock
+        if (product.getStockQuantity() <= 0) {
+            buttonAddToCart.setEnabled(false);
+            buttonAddToCart.setText("Hết hàng");
+        } else {
+            buttonAddToCart.setEnabled(true);
+            buttonAddToCart.setText("Thêm vào giỏ hàng");
         }
     }
 

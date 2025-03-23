@@ -26,7 +26,7 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText editTextUsername, editTextPassword;
-    private Button buttonLogin;
+    private Button buttonLogin, buttonBack;
     private ProgressBar progressBar;
     private TextView textViewRegister;
     private TokenManager tokenManager;
@@ -43,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         progressBar = findViewById(R.id.progressBar);
         textViewRegister = findViewById(R.id.textViewRegister);
+        buttonBack = findViewById(R.id.buttonBack);
 
         // Initialize token manager and API service
         tokenManager = new TokenManager(this);
@@ -52,6 +53,12 @@ public class LoginActivity extends AppCompatActivity {
         if (tokenManager.isLoggedIn()) {
             navigateToMainActivity();
             return;
+        }
+        
+        // Kiểm tra nếu được mở từ nút Register
+        if (getIntent().getBooleanExtra("SHOW_REGISTER", false)) {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            // Không finish() để người dùng có thể quay lại màn hình đăng nhập
         }
 
         // Set up click listeners
@@ -66,6 +73,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
+        
+        buttonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Quay lại màn hình chính
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
             }
         });
     }
@@ -130,6 +146,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void navigateToMainActivity() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        // Xóa activity stack để người dùng không thể quay lại màn hình đăng nhập sau khi đã đăng nhập
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
