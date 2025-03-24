@@ -269,7 +269,13 @@ public class TerrariumRepository {
             return;
         }
         
-        apiService.getUserCart(tokenManager.getAuthorizationHeader()).enqueue(new Callback<Cart>() {
+        int userId = tokenManager.getUserId();
+        if (userId == -1) {
+            callback.onError("User ID not found");
+            return;
+        }
+        
+        apiService.getUserCart(tokenManager.getAuthorizationHeader(), userId).enqueue(new Callback<Cart>() {
             @Override
             public void onResponse(Call<Cart> call, Response<Cart> response) {
                 if (response.isSuccessful() && response.body() != null) {

@@ -67,8 +67,8 @@ public interface TerrariumApiService {
     Call<List<Product>> searchProducts(@Query("query") String searchQuery);
     
     // Cart endpoints
-    @GET("cart")
-    Call<Cart> getUserCart(@Header("Authorization") String token);
+    @GET("cart/{userId}")
+    Call<Cart> getUserCart(@Header("Authorization") String token, @Path("userId") int userId);
     
     @POST("cart/add")
     Call<CartItem> addItemToCart(@Header("Authorization") String token, @Body CartItem cartItem);

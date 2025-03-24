@@ -260,3 +260,4 @@ D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Pro
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.Web\obj\Debug\net6.0\TerrariumStore.Web.dll
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.Web\obj\Debug\net6.0\refint\TerrariumStore.Web.dll
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.Web\obj\Debug\net6.0\TerrariumStore.Web.pdb
+D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.Web\obj\Debug\net6.0\TerrariumStore.Web.sourcelink.json

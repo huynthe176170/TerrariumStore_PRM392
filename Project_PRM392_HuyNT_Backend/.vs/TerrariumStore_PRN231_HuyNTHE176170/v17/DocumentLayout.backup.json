@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|d:\\download_o_d\\chuyennganh_ki8\\prm392\\projectfinal_prm392\\project_prm_final\\project_terrarium_prm392\\project_prm392_huynt_backend\\terrariumstore.api\\dtos\\cartdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|solutionrelative:terrariumstore.api\\dtos\\cartdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|d:\\download_o_d\\chuyennganh_ki8\\prm392\\projectfinal_prm392\\project_prm_final\\project_terrarium_prm392\\project_prm392_huynt_backend\\terrariumstore.api\\dtos\\productdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|solutionrelative:terrariumstore.api\\dtos\\productdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|d:\\download_o_d\\chuyennganh_ki8\\prm392\\projectfinal_prm392\\project_prm_final\\project_terrarium_prm392\\project_prm392_huynt_backend\\terrariumstore.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{AB42FF28-B812-4901-9915-1B3844CB20D8}|TerrariumStore.API\\TerrariumStore.API.csproj|solutionrelative:terrariumstore.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
@@ -14,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 18,
+          "SelectedChildIndex": 19,
           "Children": [
             {
               "$type": "Bookmark",
@@ -90,7 +98,33 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProductDTO.cs",
+              "DocumentMoniker": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\DTOs\\ProductDTO.cs",
+              "RelativeDocumentMoniker": "TerrariumStore.API\\DTOs\\ProductDTO.cs",
+              "ToolTip": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\DTOs\\ProductDTO.cs",
+              "RelativeToolTip": "TerrariumStore.API\\DTOs\\ProductDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-24T13:55:30.236Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CartDTOs.cs",
+              "DocumentMoniker": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\DTOs\\CartDTOs.cs",
+              "RelativeDocumentMoniker": "TerrariumStore.API\\DTOs\\CartDTOs.cs",
+              "ToolTip": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\DTOs\\CartDTOs.cs",
+              "RelativeToolTip": "TerrariumStore.API\\DTOs\\CartDTOs.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwBQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-24T13:52:32.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "launchSettings.json",
               "DocumentMoniker": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "TerrariumStore.API\\Properties\\launchSettings.json",

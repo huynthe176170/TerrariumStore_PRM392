@@ -1,4 +1,6 @@
-﻿namespace TerrariumStore.API.DTOs
+﻿using System.Collections.Generic;
+
+namespace TerrariumStore.API.DTOs
 {
     public class CartDTO
     {
@@ -11,7 +13,7 @@
     {
         public int Id { get; set; }
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+        public ProductDTO Product { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
     }

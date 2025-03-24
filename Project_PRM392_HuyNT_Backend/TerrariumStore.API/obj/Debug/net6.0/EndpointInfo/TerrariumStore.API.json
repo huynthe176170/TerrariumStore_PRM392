@@ -1614,9 +1614,8 @@
             "type": "integer",
             "format": "int32"
           },
-          "productName": {
-            "type": "string",
-            "nullable": true
+          "product": {
+            "$ref": "#/components/schemas/ProductDTO"
           },
           "quantity": {
             "type": "integer",

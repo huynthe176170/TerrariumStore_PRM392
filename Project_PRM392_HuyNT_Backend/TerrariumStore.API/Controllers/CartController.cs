@@ -26,13 +26,15 @@ namespace TerrariumStore.API.Controllers
         {
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Product)
+                    .ThenInclude(ci => ci.Product)
+                        .ThenInclude(p => p.Category)
                 .FirstOrDefaultAsync(c => c.UserId == userId);
 
             if (cart == null)
                 return NotFound("Giỏ hàng không tồn tại.");
 
-            return Ok(_mapper.Map<CartDTO>(cart));
+            var cartDto = _mapper.Map<CartDTO>(cart);
+            return Ok(cartDto);
         }
 
         // API thêm sản phẩm vào giỏ hàng

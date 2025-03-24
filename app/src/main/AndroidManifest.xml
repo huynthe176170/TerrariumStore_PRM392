@@ -49,6 +49,11 @@
             android:exported="false"
             android:theme="@style/Base.Theme.AppCompat.Light.DarkActionBar" />
             
+        <activity
+            android:name=".ui.CartActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+            
     </application>
 
 </manifest>

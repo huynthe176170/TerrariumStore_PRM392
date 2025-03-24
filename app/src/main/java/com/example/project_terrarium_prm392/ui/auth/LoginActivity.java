@@ -2,6 +2,7 @@ package com.example.project_terrarium_prm392.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -120,11 +121,23 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse authResponse = response.body();
                     
+                    // Debug log the response
+                    Log.d("LoginActivity", "Login response - Token: " + authResponse.getToken());
+                    Log.d("LoginActivity", "Login response - UserId: " + authResponse.getUserId());
+                    Log.d("LoginActivity", "Login response - Username: " + authResponse.getUsername());
+                    Log.d("LoginActivity", "Login response - Role: " + authResponse.getRole());
+                    
                     // Save user session
                     tokenManager.saveToken(authResponse.getToken());
                     tokenManager.saveUserId(authResponse.getUserId());
                     tokenManager.saveUsername(authResponse.getUsername());
                     tokenManager.saveUserRole(authResponse.getRole());
+
+                    // Verify saved data
+                    Log.d("LoginActivity", "Saved data - Token: " + tokenManager.getToken());
+                    Log.d("LoginActivity", "Saved data - UserId: " + tokenManager.getUserId());
+                    Log.d("LoginActivity", "Saved data - Username: " + tokenManager.getUsername());
+                    Log.d("LoginActivity", "Saved data - Role: " + tokenManager.getUserRole());
 
                     // Navigate to main activity
                     navigateToMainActivity();

@@ -672,3 +672,4 @@ D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Pro
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.API\obj\Debug\net6.0\TerrariumStore.API.pdb
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.API\obj\Debug\net6.0\TerrariumStore.API.genruntimeconfig.cache
 D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.API\obj\Debug\net6.0\ref\TerrariumStore.API.dll
+D:\DOWNLOAD_O_D\chuyennganh_ki8\PRM392\ProjectFinal_PRM392\Project_PRM_final\Project_Terrarium_PRM392\Project_PRM392_HuyNT_Backend\TerrariumStore.API\obj\Debug\net6.0\TerrariumStore.API.sourcelink.json

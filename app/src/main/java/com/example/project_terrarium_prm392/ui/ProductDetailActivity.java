@@ -19,9 +19,11 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.project_terrarium_prm392.R;
 import com.example.project_terrarium_prm392.models.CartItem;
 import com.example.project_terrarium_prm392.models.Product;
+import com.example.project_terrarium_prm392.repository.CartRepository;
 import com.example.project_terrarium_prm392.repository.TerrariumRepository;
 import com.example.project_terrarium_prm392.ui.auth.LoginActivity;
 import com.example.project_terrarium_prm392.utils.TokenManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
 public class ProductDetailActivity extends AppCompatActivity {
@@ -34,12 +36,14 @@ public class ProductDetailActivity extends AppCompatActivity {
     private TextView textViewProductCategory;
     private TextView textViewProductDescription;
     private Button buttonAddToCart;
+    private FloatingActionButton fabViewCart;
     private ProgressBar progressBar;
 
     private int productId;
     private Product currentProduct;
     private TokenManager tokenManager;
     private TerrariumRepository repository;
+    private CartRepository cartRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +63,13 @@ public class ProductDetailActivity extends AppCompatActivity {
             textViewProductCategory = findViewById(R.id.textViewProductCategory);
             textViewProductDescription = findViewById(R.id.textViewProductDescription);
             buttonAddToCart = findViewById(R.id.buttonAddToCart);
+            fabViewCart = findViewById(R.id.fabViewCart);
             progressBar = findViewById(R.id.progressBar);
             
-            // Initialize token manager and repository
+            // Initialize token manager and repositories
             tokenManager = new TokenManager(this);
             repository = new TerrariumRepository(this);
+            cartRepository = new CartRepository(this);
             
             // Get product ID from intent
             productId = getIntent().getIntExtra(EXTRA_PRODUCT_ID, -1);
@@ -78,60 +84,98 @@ public class ProductDetailActivity extends AppCompatActivity {
             loadProductDetails(productId);
             
             // Set up add to cart button
-//            buttonAddToCart.setOnClickListener(v -> {
-//                addToCart();
-//            });
+            buttonAddToCart.setOnClickListener(v -> {
+                addToCart();
+            });
+            
+            // Set up view cart button
+            fabViewCart.setOnClickListener(v -> {
+                openCartActivity();
+            });
         } catch (Exception e) {
             Log.e(TAG, "Lỗi khởi tạo ProductDetailActivity: " + e.getMessage(), e);
             Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
     
-//    private void addToCart() {
-//        // Kiểm tra đăng nhập trước khi thêm vào giỏ hàng
-//        if (!tokenManager.isLoggedIn()) {
-//            // Hiển thị dialog yêu cầu đăng nhập
-//            new AlertDialog.Builder(this)
-//                .setTitle("Yêu cầu đăng nhập")
-//                .setMessage("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.")
-//                .setPositiveButton("Đăng nhập", (dialog, which) -> {
-//                    // Chuyển đến màn hình đăng nhập
-//                    Intent intent = new Intent(ProductDetailActivity.this, LoginActivity.class);
-//                    startActivity(intent);
-//                })
-//                .setNegativeButton("Hủy", null)
-//                .show();
-//            return;
-//        }
-//
-//        // Đã đăng nhập, tiếp tục thêm vào giỏ hàng
-//        if (currentProduct != null) {
-//            // Tạo CartItem object
-//            CartItem cartItem = new CartItem();
-//            cartItem.setProductId(currentProduct.getId());
-//            cartItem.setQuantity(1); // Mặc định là 1
-//
-//            progressBar.setVisibility(View.VISIBLE);
-//
-//            // Gọi API thêm vào giỏ hàng
-//            repository.addToCart(cartItem, new TerrariumRepository.RepositoryCallback<CartItem>() {
-//                @Override
-//                public void onSuccess(CartItem result) {
-//                    progressBar.setVisibility(View.GONE);
-//                    Toast.makeText(ProductDetailActivity.this, "Đã thêm " + currentProduct.getName() + " vào giỏ hàng", Toast.LENGTH_SHORT).show();
-//                }
-//
-//                @Override
-//                public void onError(Exception e) {
-//                    progressBar.setVisibility(View.GONE);
-//                    Toast.makeText(ProductDetailActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    Log.e(TAG, "Lỗi thêm vào giỏ hàng: " + e.getMessage(), e);
-//                }
-//            });
-//        } else {
-//            Toast.makeText(this, "Không thể thêm vào giỏ hàng, dữ liệu sản phẩm không có sẵn", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    private void openCartActivity() {
+        // Kiểm tra đăng nhập trước khi mở giỏ hàng
+        if (!tokenManager.isLoggedIn()) {
+            // Hiển thị dialog yêu cầu đăng nhập
+            new AlertDialog.Builder(this)
+                .setTitle("Yêu cầu đăng nhập")
+                .setMessage("Bạn cần đăng nhập để xem giỏ hàng.")
+                .setPositiveButton("Đăng nhập", (dialog, which) -> {
+                    // Chuyển đến màn hình đăng nhập
+                    Intent intent = new Intent(ProductDetailActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+            return;
+        }
+
+        // Chuyển đến màn hình giỏ hàng
+        Intent intent = new Intent(ProductDetailActivity.this, CartActivity.class);
+        startActivity(intent);
+    }
+    
+    private void addToCart() {
+        // Kiểm tra đăng nhập trước khi thêm vào giỏ hàng
+        if (!tokenManager.isLoggedIn()) {
+            // Hiển thị dialog yêu cầu đăng nhập
+            new AlertDialog.Builder(this)
+                .setTitle("Yêu cầu đăng nhập")
+                .setMessage("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.")
+                .setPositiveButton("Đăng nhập", (dialog, which) -> {
+                    // Chuyển đến màn hình đăng nhập
+                    Intent intent = new Intent(ProductDetailActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+            return;
+        }
+
+        // Đã đăng nhập, tiếp tục thêm vào giỏ hàng
+        if (currentProduct != null) {
+            // Tạo CartItem object
+            CartItem cartItem = new CartItem();
+            cartItem.setProductId(currentProduct.getId());
+            cartItem.setQuantity(1); // Mặc định là 1
+            cartItem.setPrice(currentProduct.getPrice());
+
+            progressBar.setVisibility(View.VISIBLE);
+
+            // Gọi API thêm vào giỏ hàng
+            cartRepository.addItemToCart(cartItem, new CartRepository.CartItemCallback() {
+                @Override
+                public void onSuccess(CartItem result) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(ProductDetailActivity.this, "Đã thêm " + currentProduct.getName() + " vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                    
+                    // Hiển thị dialog hỏi người dùng có muốn xem giỏ hàng không
+                    new AlertDialog.Builder(ProductDetailActivity.this)
+                        .setTitle("Thêm vào giỏ hàng thành công")
+                        .setMessage("Bạn có muốn xem giỏ hàng không?")
+                        .setPositiveButton("Xem giỏ hàng", (dialog, which) -> {
+                            openCartActivity();
+                        })
+                        .setNegativeButton("Tiếp tục mua sắm", null)
+                        .show();
+                }
+
+                @Override
+                public void onError(String message) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(ProductDetailActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Lỗi thêm vào giỏ hàng: " + message);
+                }
+            });
+        } else {
+            Toast.makeText(this, "Không thể thêm vào giỏ hàng, dữ liệu sản phẩm không có sẵn", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private void loadProductDetails(int productId) {
         try {

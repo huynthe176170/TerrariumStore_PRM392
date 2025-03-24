@@ -42,9 +42,9 @@ namespace TerrariumStore.API.Profiles
             // Ánh xạ giữa Cart và CartDTO
             CreateMap<Cart, CartDTO>();
 
-            // Ánh xạ giữa CartItem và CartItemDTO (lấy thêm ProductName)
+            // Ánh xạ giữa CartItem và CartItemDTO (bao gồm thông tin Product)
             CreateMap<CartItem, CartItemDTO>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
 
             // Ánh xạ từ AddCartItemDTO sang CartItem để thêm vào DB
             CreateMap<AddCartItemDTO, CartItem>();
