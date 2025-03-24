@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TerrariumStore.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ec85e453e0bc6061ea88aa1711b6dd07c3ad550")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16efd1f4bb32d77e8117c5f4dd3477e0f5ad45cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("TerrariumStore.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TerrariumStore.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

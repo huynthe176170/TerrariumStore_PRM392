@@ -14,7 +14,7 @@
         android:padding="8dp">
 
         <ImageView
-            android:id="@+id/imageViewProduct"
+            android:id="@+id/imageProduct"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="centerCrop"
@@ -23,7 +23,7 @@
             tools:src="@tools:sample/avatars" />
 
         <TextView
-            android:id="@+id/textViewProductName"
+            android:id="@+id/textProductName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -33,25 +33,25 @@
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/imageButtonDelete"
-            app:layout_constraintStart_toEndOf="@+id/imageViewProduct"
+            app:layout_constraintEnd_toStartOf="@+id/buttonRemove"
+            app:layout_constraintStart_toEndOf="@+id/imageProduct"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tên sản phẩm" />
 
         <TextView
-            android:id="@+id/textViewPrice"
+            android:id="@+id/textPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@+id/imageViewProduct"
-            app:layout_constraintTop_toBottomOf="@+id/textViewProductName"
+            app:layout_constraintStart_toEndOf="@+id/imageProduct"
+            app:layout_constraintTop_toBottomOf="@+id/textProductName"
             tools:text="250,000 đ" />
 
         <TextView
-            android:id="@+id/textViewSubtotal"
+            android:id="@+id/textTotal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -59,7 +59,7 @@
             android:textColor="@android:color/black"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/imageViewProduct"
+            app:layout_constraintStart_toEndOf="@+id/imageProduct"
             app:layout_constraintTop_toBottomOf="@+id/quantityLayout"
             tools:text="Tổng: 500,000 đ" />
 
@@ -70,11 +70,11 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:orientation="horizontal"
-            app:layout_constraintStart_toEndOf="@+id/imageViewProduct"
-            app:layout_constraintTop_toBottomOf="@+id/textViewPrice">
+            app:layout_constraintStart_toEndOf="@+id/imageProduct"
+            app:layout_constraintTop_toBottomOf="@+id/textPrice">
 
             <ImageButton
-                android:id="@+id/buttonDecreaseQuantity"
+                android:id="@+id/buttonDecrease"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -82,7 +82,7 @@
                 android:src="@android:drawable/ic_menu_delete" />
 
             <TextView
-                android:id="@+id/textViewQuantity"
+                android:id="@+id/textQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -93,7 +93,7 @@
                 android:textStyle="bold" />
 
             <ImageButton
-                android:id="@+id/buttonIncreaseQuantity"
+                android:id="@+id/buttonIncrease"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -103,7 +103,7 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/imageButtonDelete"
+            android:id="@+id/buttonRemove"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"

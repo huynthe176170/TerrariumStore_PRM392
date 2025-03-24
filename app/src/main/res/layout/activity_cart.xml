@@ -23,7 +23,7 @@
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/checkoutPanel"
+        app:layout_constraintBottom_toTopOf="@+id/layoutCheckout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
@@ -33,7 +33,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:padding="8dp" />
+            android:padding="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/layoutCheckout" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -50,50 +52,50 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/checkoutPanel"
+        android:id="@+id/layoutCheckout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="8dp"
-        app:cardBackgroundColor="@android:color/white"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textViewTotal"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Tổng tiền:"
-                android:textSize="16sp"
-                app:layout_constraintBaseline_toBaselineOf="@+id/textViewTotalAmount"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
 
-            <TextView
-                android:id="@+id/textViewTotalAmount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="0 đ"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/buttonCheckout"
-                app:layout_constraintStart_toEndOf="@+id/textViewTotal"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tổng tiền:"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewTotalPrice"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/buttonCheckout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Thanh toán"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:textAllCaps="false" />
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <ProgressBar
@@ -101,9 +103,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout> 

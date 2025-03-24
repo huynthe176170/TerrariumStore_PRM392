@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -84,9 +85,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             loadProductDetails(productId);
             
             // Set up add to cart button
-            buttonAddToCart.setOnClickListener(v -> {
-                addToCart();
-            });
+            setupAddToCartButton();
             
             // Set up view cart button
             fabViewCart.setOnClickListener(v -> {
@@ -120,60 +119,72 @@ public class ProductDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
     
-    private void addToCart() {
-        // Kiểm tra đăng nhập trước khi thêm vào giỏ hàng
-        if (!tokenManager.isLoggedIn()) {
-            // Hiển thị dialog yêu cầu đăng nhập
-            new AlertDialog.Builder(this)
-                .setTitle("Yêu cầu đăng nhập")
-                .setMessage("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.")
-                .setPositiveButton("Đăng nhập", (dialog, which) -> {
-                    // Chuyển đến màn hình đăng nhập
-                    Intent intent = new Intent(ProductDetailActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                })
-                .setNegativeButton("Hủy", null)
-                .show();
-            return;
-        }
+    private void setupAddToCartButton() {
+        Button btnAddToCart = findViewById(R.id.buttonAddToCart);
+        EditText quantityEditText = findViewById(R.id.editTextQuantity);
 
-        // Đã đăng nhập, tiếp tục thêm vào giỏ hàng
-        if (currentProduct != null) {
-            // Tạo CartItem object
-            CartItem cartItem = new CartItem();
-            cartItem.setProductId(currentProduct.getId());
-            cartItem.setQuantity(1); // Mặc định là 1
-            cartItem.setPrice(currentProduct.getPrice());
+        btnAddToCart.setOnClickListener(v -> {
+            if (!tokenManager.isLoggedIn()) {
+                Toast.makeText(this, "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, LoginActivity.class));
+                return;
+            }
 
-            progressBar.setVisibility(View.VISIBLE);
+            String quantityStr = quantityEditText.getText().toString();
+            if (quantityStr.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập số lượng", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Gọi API thêm vào giỏ hàng
-            cartRepository.addItemToCart(cartItem, new CartRepository.CartItemCallback() {
-                @Override
-                public void onSuccess(CartItem result) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(ProductDetailActivity.this, "Đã thêm " + currentProduct.getName() + " vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                    
-                    // Hiển thị dialog hỏi người dùng có muốn xem giỏ hàng không
-                    new AlertDialog.Builder(ProductDetailActivity.this)
-                        .setTitle("Thêm vào giỏ hàng thành công")
-                        .setMessage("Bạn có muốn xem giỏ hàng không?")
-                        .setPositiveButton("Xem giỏ hàng", (dialog, which) -> {
-                            openCartActivity();
-                        })
-                        .setNegativeButton("Tiếp tục mua sắm", null)
-                        .show();
-                }
+            int quantity = Integer.parseInt(quantityStr);
+            if (quantity <= 0) {
+                Toast.makeText(this, "Số lượng phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-                @Override
-                public void onError(String message) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(ProductDetailActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Lỗi thêm vào giỏ hàng: " + message);
-                }
-            });
-        } else {
-            Toast.makeText(this, "Không thể thêm vào giỏ hàng, dữ liệu sản phẩm không có sẵn", Toast.LENGTH_SHORT).show();
+            if (currentProduct == null) {
+                Toast.makeText(this, "Không tìm thấy thông tin sản phẩm", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (quantity > currentProduct.getStockQuantity()) {
+                Toast.makeText(this, "Số lượng vượt quá hàng tồn kho", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            addToCart(quantity);
+        });
+    }
+
+    private void addToCart(int quantity) {
+        CartItem cartItem = new CartItem();
+        cartItem.setProductId(currentProduct.getId());
+        cartItem.setQuantity(quantity);
+        cartItem.setPrice(currentProduct.getPrice());
+        cartItem.setProduct(currentProduct);
+
+        showLoading(true);
+        cartRepository.addItemToCart(cartItem, new CartRepository.CartItemCallback() {
+            @Override
+            public void onSuccess(CartItem cartItem) {
+                showLoading(false);
+                Toast.makeText(ProductDetailActivity.this, 
+                    "Đã thêm " + quantity + " sản phẩm vào giỏ hàng", 
+                    Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                showLoading(false);
+                Toast.makeText(ProductDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showLoading(boolean show) {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
 

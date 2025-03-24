@@ -1,6 +1,7 @@
 package com.example.project_terrarium_prm392.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +13,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.project_terrarium_prm392.R;
+import com.example.project_terrarium_prm392.models.CartItem;
 import com.example.project_terrarium_prm392.models.Product;
+import com.example.project_terrarium_prm392.repository.CartRepository;
+import com.example.project_terrarium_prm392.ui.auth.LoginActivity;
+import com.example.project_terrarium_prm392.utils.TokenManager;
 import com.squareup.picasso.Picasso;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
@@ -58,48 +66,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     }
 
     public class ProductViewHolder extends RecyclerView.ViewHolder {
-        private ImageView imageViewProduct;
-        private TextView textViewProductName;
-        private TextView textViewPrice;
-        private TextView textViewDescription;
-        private Button buttonAddToCart;
+        private final ImageView imageViewProduct;
+        private final TextView textViewProductName;
+        private final TextView textViewPrice;
+        private final Button buttonAddToCart;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             imageViewProduct = itemView.findViewById(R.id.imageViewProduct);
             textViewProductName = itemView.findViewById(R.id.textViewProductName);
             textViewPrice = itemView.findViewById(R.id.textViewPrice);
-            textViewDescription = itemView.findViewById(R.id.textViewDescription);
             buttonAddToCart = itemView.findViewById(R.id.buttonAddToCart);
-
-            itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && onProductClickListener != null) {
-                    onProductClickListener.onProductClick(products.get(position));
-                }
-            });
-
-            buttonAddToCart.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    Product product = products.get(position);
-                    Toast.makeText(context, product.getName() + " added to cart", Toast.LENGTH_SHORT).show();
-                    // Here you would call your repository to add the item to the cart
-                }
-            });
         }
 
         public void bind(Product product) {
             textViewProductName.setText(product.getName());
-            textViewPrice.setText(String.format("$%.2f", product.getPrice()));
-            
-            if (product.getDescription() != null && !product.getDescription().isEmpty()) {
-                textViewDescription.setText(product.getDescription());
-                textViewDescription.setVisibility(View.VISIBLE);
-            } else {
-                textViewDescription.setVisibility(View.GONE);
-            }
+            textViewPrice.setText(formatPrice(product.getPrice()));
 
+            // Load product image using Glide
             if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
                 Picasso.get()
                         .load(product.getImageUrl())
@@ -109,6 +93,49 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             } else {
                 imageViewProduct.setImageResource(R.drawable.ic_launcher_foreground);
             }
+
+            // Set click listener for the whole item
+            itemView.setOnClickListener(v -> {
+                if (onProductClickListener != null) {
+                    onProductClickListener.onProductClick(product);
+                }
+            });
+
+            // Set click listener for Add to Cart button
+            buttonAddToCart.setOnClickListener(v -> {
+                Context context = itemView.getContext();
+                TokenManager tokenManager = new TokenManager(context);
+                
+                if (!tokenManager.isLoggedIn()) {
+                    Toast.makeText(context, "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                    context.startActivity(new Intent(context, LoginActivity.class));
+                    return;
+                }
+
+                CartRepository cartRepository = new CartRepository(context);
+                CartItem cartItem = new CartItem();
+                cartItem.setProductId(product.getId());
+                cartItem.setQuantity(1); // Default quantity is 1
+                cartItem.setPrice(product.getPrice());
+                cartItem.setProduct(product);
+
+                cartRepository.addItemToCart(cartItem, new CartRepository.CartItemCallback() {
+                    @Override
+                    public void onSuccess(CartItem cartItem) {
+                        Toast.makeText(context, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        }
+
+        private String formatPrice(double price) {
+            NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+            return formatter.format(price) + " đ";
         }
     }
 

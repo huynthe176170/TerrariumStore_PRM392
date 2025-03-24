@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -21,36 +22,30 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.project_terrarium_prm392.R;
 import com.example.project_terrarium_prm392.models.Cart;
 import com.example.project_terrarium_prm392.models.CartItem;
-import com.example.project_terrarium_prm392.models.Product;
 import com.example.project_terrarium_prm392.repository.CartRepository;
-import com.example.project_terrarium_prm392.repository.TerrariumRepository;
 import com.example.project_terrarium_prm392.ui.adapters.CartAdapter;
 import com.example.project_terrarium_prm392.ui.auth.LoginActivity;
 import com.example.project_terrarium_prm392.utils.TokenManager;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemListener {
     private static final String TAG = "CartActivity";
+    private static final int REQUEST_CHECKOUT = 100;
 
     private CartRepository cartRepository;
     private CartAdapter cartAdapter;
     
-    // UI components
-    private Toolbar toolbar;
     private RecyclerView recyclerViewCart;
     private TextView emptyCartMessage;
-    private CardView checkoutPanel;
+    private CardView layoutCheckout;
     private Button buttonCheckout;
-    private TextView textViewTotalAmount;
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView textViewTotalPrice;
 
     private TokenManager tokenManager;
-    private TerrariumRepository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +55,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         Log.d(TAG, "CartActivity onCreate");
         
         tokenManager = new TokenManager(this);
-        repository = new TerrariumRepository(this);
-        
-        // Debug logging
-        Log.d("CartActivity", "Token: " + tokenManager.getToken());
-        Log.d("CartActivity", "UserId: " + tokenManager.getUserId());
-        Log.d("CartActivity", "Username: " + tokenManager.getUsername());
-        Log.d("CartActivity", "Is logged in: " + tokenManager.isLoggedIn());
         
         if (!tokenManager.isLoggedIn()) {
             Toast.makeText(this, "Please login to view cart", Toast.LENGTH_SHORT).show();
@@ -75,14 +63,23 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             return;
         }
         
-        // Initialize views
+        initViews();
+        setupRecyclerView();
+        setupSwipeRefresh();
+        setupCheckoutButton();
+        
+        // Load cart data
+        loadCart();
+    }
+
+    private void initViews() {
         recyclerViewCart = findViewById(R.id.recyclerViewCart);
         progressBar = findViewById(R.id.progressBar);
         emptyCartMessage = findViewById(R.id.emptyCartMessage);
-        checkoutPanel = findViewById(R.id.checkoutPanel);
+        layoutCheckout = findViewById(R.id.layoutCheckout);
         buttonCheckout = findViewById(R.id.buttonCheckout);
-        textViewTotalAmount = findViewById(R.id.textViewTotalAmount);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        textViewTotalPrice = findViewById(R.id.textViewTotalPrice);
         
         if (recyclerViewCart == null) {
             Log.e(TAG, "RecyclerView not found in layout");
@@ -91,24 +88,21 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             return;
         }
 
-        // Initialize repository
         cartRepository = new CartRepository(this);
-        
-        // Initialize CartAdapter
+    }
+
+    private void setupRecyclerView() {
         cartAdapter = new CartAdapter(this, this);
-        
-        // Setup RecyclerView
         recyclerViewCart.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewCart.setAdapter(cartAdapter);
-        
-        // Setup swipe refresh
-        swipeRefreshLayout.setOnRefreshListener(this::loadCart);
+    }
 
-        // Setup checkout button
-        buttonCheckout.setOnClickListener(v -> proceedToCheckout());
-        
-        // Load cart data
-        loadCart();
+    private void setupSwipeRefresh() {
+        swipeRefreshLayout.setOnRefreshListener(this::loadCart);
+    }
+
+    private void setupCheckoutButton() {
+        buttonCheckout.setOnClickListener(v -> startCheckout());
     }
 
     private void loadCart() {
@@ -120,7 +114,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 showLoading(false);
                 if (cart != null && cart.getCartItems() != null && !cart.getCartItems().isEmpty()) {
                     cartAdapter.setCartItems(cart.getCartItems());
-                    updateTotalPrice();
+                    updateCartTotal();
                     showCartContent();
                 } else {
                     showEmptyCart();
@@ -136,20 +130,41 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         });
     }
 
+    private void updateCartTotal() {
+        cartRepository.getCartTotal(new CartRepository.CartTotalCallback() {
+            @Override
+            public void onSuccess(double total) {
+                textViewTotalPrice.setText(formatPrice(total));
+                buttonCheckout.setEnabled(total > 0);
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(CartActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void showEmptyCart() {
         emptyCartMessage.setVisibility(View.VISIBLE);
         recyclerViewCart.setVisibility(View.GONE);
-        checkoutPanel.setVisibility(View.GONE);
+        layoutCheckout.setVisibility(View.GONE);
     }
 
-    private void updateTotalPrice() {
-        double totalPrice = cartAdapter.getTotalPrice();
-        textViewTotalAmount.setText(formatCurrency(totalPrice));
+    private void showCartContent() {
+        emptyCartMessage.setVisibility(View.GONE);
+        recyclerViewCart.setVisibility(View.VISIBLE);
+        layoutCheckout.setVisibility(View.VISIBLE);
     }
 
     private String formatCurrency(double amount) {
         NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
         return formatter.format(amount) + " đ";
+    }
+
+    private String formatPrice(double price) {
+        NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        return formatter.format(price) + " đ";
     }
 
     private void showLoading(boolean isLoading) {
@@ -181,20 +196,14 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private void updateCartItemQuantity(CartItem cartItem, int newQuantity) {
         showLoading(true);
         cartItem.setQuantity(newQuantity);
+        cartItem.setUserId(tokenManager.getUserId());
         
         cartRepository.updateCartItem(cartItem, new CartRepository.CartItemCallback() {
             @Override
             public void onSuccess(CartItem updatedCartItem) {
                 showLoading(false);
-                // Update the item in the list
-                for (int i = 0; i < cartAdapter.getCartItems().size(); i++) {
-                    if (cartAdapter.getCartItems().get(i).getId() == updatedCartItem.getId()) {
-                        cartAdapter.getCartItems().set(i, updatedCartItem);
-                        cartAdapter.notifyItemChanged(i);
-                        break;
-                    }
-                }
-                updateTotalPrice();
+                cartAdapter.updateItem(updatedCartItem);
+                updateCartTotal();
             }
 
             @Override
@@ -209,16 +218,14 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private void removeCartItem(CartItem cartItem) {
         showLoading(true);
         
-        cartRepository.removeCartItem(cartItem.getId(), new CartRepository.OperationCallback() {
+        cartRepository.removeCartItem(cartItem.getId(), cartItem.getProductId(), new CartRepository.OperationCallback() {
             @Override
             public void onSuccess() {
                 showLoading(false);
-                // Remove the item from the adapter
-                cartAdapter.getCartItems().remove(cartItem);
-                cartAdapter.notifyDataSetChanged();
-                updateTotalPrice();
+                cartAdapter.removeItem(cartItem);
+                updateCartTotal();
                 
-                if (cartAdapter.getCartItems().isEmpty()) {
+                if (cartAdapter.getItemCount() == 0) {
                     showEmptyCart();
                 }
             }
@@ -232,30 +239,30 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         });
     }
 
-    private void proceedToCheckout() {
-        if (cartAdapter.getCartItems().isEmpty()) {
-            Toast.makeText(this, "Giỏ hàng trống. Vui lòng thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
+    private void startCheckout() {
+        if (cartAdapter.getItemCount() == 0) {
+            Toast.makeText(this, "Giỏ hàng trống", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        // Navigate to checkout activity
-        // Intent intent = new Intent(this, CheckoutActivity.class);
-        // startActivity(intent);
-        
-        // Temporary toast until checkout is implemented
-        Toast.makeText(this, "Tính năng thanh toán đang được phát triển", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(this, CheckoutActivity.class);
+        startActivityForResult(intent, REQUEST_CHECKOUT);
     }
 
-    private void showCartContent() {
-        emptyCartMessage.setVisibility(View.GONE);
-        recyclerViewCart.setVisibility(View.VISIBLE);
-        checkoutPanel.setVisibility(View.VISIBLE);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CHECKOUT && resultCode == RESULT_OK) {
+            // Checkout thành công, đóng màn hình giỏ hàng
+            setResult(RESULT_OK);
+            finish();
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
