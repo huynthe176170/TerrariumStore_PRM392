@@ -68,19 +68,19 @@ public interface TerrariumApiService {
     
     // Cart endpoints
     @GET("cart/{userId}")
-    Call<Cart> getUserCart(@Header("Authorization") String token, @Path("userId") int userId);
+    Call<Cart> getUserCart(@Header("Authorization") String authHeader, @Path("userId") int userId);
     
     @POST("cart/add")
-    Call<CartItem> addItemToCart(@Header("Authorization") String token, @Body CartItem cartItem);
+    Call<okhttp3.ResponseBody> addItemToCart(@Header("Authorization") String authHeader, @Body CartItem cartItem);
     
-    @PUT("cart/items/{id}")
-    Call<CartItem> updateCartItem(@Header("Authorization") String token, @Path("id") int cartItemId, @Body CartItem cartItem);
+    @PUT("cart/update-quantity")
+    Call<okhttp3.ResponseBody> updateCartItem(@Header("Authorization") String authHeader, @Body CartItem cartItem);
     
-    @DELETE("cart/items/{id}")
-    Call<Void> removeCartItem(@Header("Authorization") String token, @Path("id") int cartItemId);
+    @DELETE("cart/remove/{userId}/{productId}")
+    Call<Void> removeCartItem(@Header("Authorization") String authHeader, @Path("userId") int userId, @Path("productId") int productId);
     
-    @DELETE("cart/clear")
-    Call<Void> clearCart(@Header("Authorization") String token);
+    @GET("cart/total/{userId}")
+    Call<Double> getCartTotal(@Header("Authorization") String authHeader, @Path("userId") int userId);
     
     // Order endpoints
     @GET("order")
