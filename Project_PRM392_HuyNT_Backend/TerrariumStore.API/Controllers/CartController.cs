@@ -186,5 +186,84 @@ namespace TerrariumStore.API.Controllers
 
             return Ok("Thanh toán thành công, đơn hàng đã được tạo.");
         }
+
+        // API cập nhật số lượng sản phẩm trong giỏ hàng
+        [HttpPut("update-quantity")]
+        public async Task<IActionResult> UpdateCartItemQuantity(UpdateCartItemDTO updateDto)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == updateDto.UserId);
+
+            if (cart == null)
+                return NotFound("Giỏ hàng không tồn tại.");
+
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == updateDto.ProductId);
+            if (cartItem == null)
+                return NotFound("Sản phẩm không có trong giỏ hàng.");
+
+            // Kiểm tra số lượng tồn kho
+            var product = await _context.Products.FindAsync(updateDto.ProductId);
+            if (product == null)
+                return BadRequest("Sản phẩm không tồn tại.");
+
+            if (updateDto.Quantity > product.StockQuantity)
+                return BadRequest($"Số lượng yêu cầu vượt quá số lượng trong kho. Chỉ còn {product.StockQuantity} sản phẩm.");
+
+            if (updateDto.Quantity <= 0)
+            {
+                cart.CartItems.Remove(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity = updateDto.Quantity;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Cập nhật số lượng thành công.");
+        }
+
+        // API xóa sản phẩm khỏi giỏ hàng
+        [HttpDelete("remove/{userId}/{productId}")]
+        public async Task<IActionResult> RemoveFromCart(int userId, int productId)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null)
+                return NotFound("Giỏ hàng không tồn tại.");
+
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+            if (cartItem == null)
+                return NotFound("Sản phẩm không có trong giỏ hàng.");
+
+            cart.CartItems.Remove(cartItem);
+            await _context.SaveChangesAsync();
+            return Ok("Xóa sản phẩm khỏi giỏ hàng thành công.");
+        }
+
+        // API lấy tổng tiền giỏ hàng
+        [HttpGet("total/{userId}")]
+        public async Task<ActionResult<decimal>> GetCartTotal(int userId)
+        {
+            var cart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (cart == null)
+                return 0;
+
+            var total = cart.CartItems.Sum(ci => ci.Price * ci.Quantity);
+            return Ok(total);
+        }
+    }
+
+    // DTO classes
+    public class UpdateCartItemDTO
+    {
+        public int UserId { get; set; }
+        public int ProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }
