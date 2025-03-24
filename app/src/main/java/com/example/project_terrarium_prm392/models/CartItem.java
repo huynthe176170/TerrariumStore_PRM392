@@ -2,7 +2,8 @@ package com.example.project_terrarium_prm392.models;
 
 public class CartItem {
     private int id;
-    private int userId;
+    private int cartId;
+    private Cart cart;
     private int productId;
     private Product product;
     private int quantity;
@@ -12,9 +13,9 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(int id, int userId, int productId, int quantity, double price) {
+    public CartItem(int id, int cartId, int productId, int quantity, double price) {
         this.id = id;
-        this.userId = userId;
+        this.cartId = cartId;
         this.productId = productId;
         this.quantity = quantity;
         this.price = price;
@@ -34,12 +35,20 @@ public class CartItem {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getCartId() {
+        return cartId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
+    }
+
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 
     public int getProductId() {

@@ -183,69 +183,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "TerrariumStore.API.Controllers.CartController",
-    "Method": "RemoveFromCart",
-    "RelativePath": "api/Cart/remove/{userId}/{productId}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "productId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "TerrariumStore.API.Controllers.CartController",
-    "Method": "GetCartTotal",
-    "RelativePath": "api/Cart/total/{userId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Decimal",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "TerrariumStore.API.Controllers.CartController",
-    "Method": "UpdateCartItemQuantity",
-    "RelativePath": "api/Cart/update-quantity",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "updateDto",
-        "Type": "TerrariumStore.API.Controllers.UpdateCartItemDTO",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "TerrariumStore.API.Controllers.CategoryController",
     "Method": "GetCategories",
     "RelativePath": "api/Category",
