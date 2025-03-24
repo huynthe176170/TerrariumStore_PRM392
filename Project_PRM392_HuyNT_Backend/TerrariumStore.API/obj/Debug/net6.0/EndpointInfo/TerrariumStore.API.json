@@ -305,112 +305,6 @@
         }
       }
     },
-    "/api/Cart/update-quantity": {
-      "put": {
-        "tags": [
-          "Cart"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCartItemDTO"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCartItemDTO"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCartItemDTO"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Cart/remove/{userId}/{productId}": {
-      "delete": {
-        "tags": [
-          "Cart"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "productId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Cart/total/{userId}": {
-      "get": {
-        "tags": [
-          "Cart"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "number",
-                  "format": "double"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "number",
-                  "format": "double"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "number",
-                  "format": "double"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Category": {
       "get": {
         "tags": [
@@ -2045,24 +1939,6 @@
           },
           "isPaid": {
             "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateCartItemDTO": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "productId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -9,7 +9,6 @@ import com.example.project_terrarium_prm392.models.Cart;
 import com.example.project_terrarium_prm392.models.CartItem;
 import com.example.project_terrarium_prm392.utils.TokenManager;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,7 +57,7 @@ public class CartRepository {
                 
                 if (response.isSuccessful() && response.body() != null) {
                     Cart cart = response.body();
-                    Log.d(TAG, "Cart received - Items count: " + 
+                    Log.d(TAG, "Cart received - ID: " + cart.getId() + ", Items count: " + 
                           (cart.getCartItems() != null ? cart.getCartItems().size() : 0));
                     callback.onSuccess(cart);
                 } else {
@@ -80,39 +79,20 @@ public class CartRepository {
             return;
         }
 
-        cartItem.setUserId(tokenManager.getUserId());
-        String authHeader = tokenManager.getAuthorizationHeader();
-
-        apiService.addItemToCart(authHeader, cartItem).enqueue(new Callback<ResponseBody>() {
+        apiService.addItemToCart(tokenManager.getAuthorizationHeader(), cartItem).enqueue(new Callback<CartItem>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String responseString = response.body() != null ? response.body().string() : "";
-                        Log.d(TAG, "Item added to cart successfully: " + responseString);
-                        callback.onSuccess(cartItem);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading response body", e);
-                        callback.onSuccess(cartItem); // Still consider it successful if we can't read response
-                    }
+            public void onResponse(Call<CartItem> call, Response<CartItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
                 } else {
-                    String errorMessage = "Failed to add item to cart";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error body", e);
-                    }
-                    Log.e(TAG, "Add to cart failed: " + errorMessage);
-                    callback.onError(errorMessage);
+                    callback.onError("Failed to add item to cart: " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "Network error adding item to cart", t);
+            public void onFailure(Call<CartItem> call, Throwable t) {
                 callback.onError("Network error: " + t.getMessage());
+                Log.e(TAG, "Add to cart error", t);
             }
         });
     }
@@ -123,113 +103,44 @@ public class CartRepository {
             return;
         }
 
-        cartItem.setUserId(tokenManager.getUserId());
-        String authHeader = tokenManager.getAuthorizationHeader();
-
-        apiService.updateCartItem(authHeader, cartItem).enqueue(new Callback<ResponseBody>() {
+        apiService.updateCartItem(tokenManager.getAuthorizationHeader(), cartItem.getId(), cartItem).enqueue(new Callback<CartItem>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String responseString = response.body() != null ? response.body().string() : "";
-                        Log.d(TAG, "Cart item updated successfully: " + responseString);
-                        callback.onSuccess(cartItem);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading response body", e);
-                        callback.onSuccess(cartItem); // Still consider it successful if we can't read response
-                    }
+            public void onResponse(Call<CartItem> call, Response<CartItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
                 } else {
-                    String errorMessage = "Failed to update cart item";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error body", e);
-                    }
-                    Log.e(TAG, "Update cart item failed: " + errorMessage);
-                    callback.onError(errorMessage);
+                    callback.onError("Failed to update cart item: " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "Network error updating cart item", t);
+            public void onFailure(Call<CartItem> call, Throwable t) {
                 callback.onError("Network error: " + t.getMessage());
+                Log.e(TAG, "Update cart item error", t);
             }
         });
     }
 
-    public void removeCartItem(int cartItemId, int productId, OperationCallback callback) {
+    public void removeCartItem(int cartItemId, OperationCallback callback) {
         if (!tokenManager.isLoggedIn()) {
             callback.onError("User not logged in");
             return;
         }
 
-        int userId = tokenManager.getUserId();
-        String authHeader = tokenManager.getAuthorizationHeader();
-
-        apiService.removeCartItem(authHeader, userId, productId).enqueue(new Callback<Void>() {
+        apiService.removeCartItem(tokenManager.getAuthorizationHeader(), cartItemId).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "Cart item removed successfully");
                     callback.onSuccess();
                 } else {
-                    String errorMessage = "Failed to remove cart item";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error body", e);
-                    }
-                    Log.e(TAG, "Remove cart item failed: " + errorMessage);
-                    callback.onError(errorMessage);
+                    callback.onError("Failed to remove cart item: " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG, "Network error removing cart item", t);
                 callback.onError("Network error: " + t.getMessage());
-            }
-        });
-    }
-
-    public void getCartTotal(CartTotalCallback callback) {
-        if (!tokenManager.isLoggedIn()) {
-            callback.onError("User not logged in");
-            return;
-        }
-
-        int userId = tokenManager.getUserId();
-        String authHeader = tokenManager.getAuthorizationHeader();
-
-        apiService.getCartTotal(authHeader, userId).enqueue(new Callback<Double>() {
-            @Override
-            public void onResponse(Call<Double> call, Response<Double> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "Cart total retrieved successfully: " + response.body());
-                    callback.onSuccess(response.body());
-                } else {
-                    String errorMessage = "Failed to get cart total";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error body", e);
-                    }
-                    Log.e(TAG, "Get cart total failed: " + errorMessage);
-                    callback.onError(errorMessage);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Double> call, Throwable t) {
-                Log.e(TAG, "Network error getting cart total", t);
-                callback.onError("Network error: " + t.getMessage());
+                Log.e(TAG, "Remove cart item error", t);
             }
         });
     }
@@ -241,11 +152,6 @@ public class CartRepository {
 
     public interface CartItemCallback {
         void onSuccess(CartItem cartItem);
-        void onError(String message);
-    }
-
-    public interface CartTotalCallback {
-        void onSuccess(double total);
         void onError(String message);
     }
 

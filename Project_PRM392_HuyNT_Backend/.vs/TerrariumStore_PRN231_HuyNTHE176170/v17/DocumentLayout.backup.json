@@ -106,7 +106,8 @@
               "RelativeToolTip": "TerrariumStore.API\\DTOs\\ProductDTO.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-24T13:55:30.236Z"
+              "WhenOpened": "2025-03-24T13:55:30.236Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -116,7 +117,7 @@
               "RelativeDocumentMoniker": "TerrariumStore.API\\DTOs\\CartDTOs.cs",
               "ToolTip": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\DTOs\\CartDTOs.cs",
               "RelativeToolTip": "TerrariumStore.API\\DTOs\\CartDTOs.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAmwBQAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwBQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-24T13:52:32.355Z",
               "EditorCaption": ""
@@ -131,7 +132,8 @@
               "RelativeToolTip": "TerrariumStore.API\\Properties\\launchSettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-03-23T07:32:10.632Z"
+              "WhenOpened": "2025-03-23T07:32:10.632Z",
+              "EditorCaption": ""
             }
           ]
         }

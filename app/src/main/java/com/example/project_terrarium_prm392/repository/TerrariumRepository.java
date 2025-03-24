@@ -20,7 +20,6 @@ import com.example.project_terrarium_prm392.utils.TokenManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -294,43 +293,26 @@ public class TerrariumRepository {
         });
     }
     
-    public void addItemToCart(CartItem cartItem, CartItemCallback callback) {
+    public void addItemToCart(CartItem cartItem, final ApiCallback<CartItem> callback) {
         if (!tokenManager.isLoggedIn()) {
             callback.onError("User not logged in");
             return;
         }
-
-        cartItem.setUserId(tokenManager.getUserId());
-        apiService.addItemToCart(tokenManager.getAuthorizationHeader(), cartItem).enqueue(new Callback<ResponseBody>() {
+        
+        apiService.addItemToCart(tokenManager.getAuthorizationHeader(), cartItem).enqueue(new Callback<CartItem>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String responseString = response.body() != null ? response.body().string() : "";
-                        Log.d(TAG, "Item added to cart successfully: " + responseString);
-                        callback.onSuccess(cartItem);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading response body", e);
-                        callback.onSuccess(cartItem); // Still consider it successful if we can't read response
-                    }
+            public void onResponse(Call<CartItem> call, Response<CartItem> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body());
                 } else {
-                    String errorMessage = "Failed to add item to cart";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMessage = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error body", e);
-                    }
-                    Log.e(TAG, "Add to cart failed: " + errorMessage);
-                    callback.onError(errorMessage);
+                    callback.onError("Failed to add item to cart: " + response.message());
                 }
             }
-
+            
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "Network error adding item to cart", t);
+            public void onFailure(Call<CartItem> call, Throwable t) {
                 callback.onError("Network error: " + t.getMessage());
+                Log.e(TAG, "Add item to cart error", t);
             }
         });
     }
@@ -419,10 +401,5 @@ public class TerrariumRepository {
     public interface RepositoryCallback<T> {
         void onSuccess(T result);
         void onError(Exception e);
-    }
-
-    public interface CartItemCallback {
-        void onSuccess(CartItem cartItem);
-        void onError(String message);
     }
 } 

@@ -15,8 +15,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 public class ApiClient {
     // URL đúng của API backend, dùng HTTPS theo Swagger UI
@@ -24,24 +22,16 @@ public class ApiClient {
     private static final String BASE_URL = "https://10.0.2.2:7024/api/";
     private static Retrofit retrofit = null;
     private static OkHttpClient okHttpClient;
-    private static TerrariumApiService apiService = null;
 
     public static TerrariumApiService getApiService() {
-        if (apiService == null) {
-            // Create a Gson instance that's lenient
-            Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
-
+        if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(getUnsafeOkHttpClient())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-            
-            apiService = retrofit.create(TerrariumApiService.class);
+                    .baseUrl(BASE_URL)
+                    .client(getUnsafeOkHttpClient())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
         }
-        return apiService;
+        return retrofit.create(TerrariumApiService.class);
     }
 
     private static OkHttpClient getUnsafeOkHttpClient() {

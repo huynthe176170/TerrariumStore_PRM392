@@ -1,6 +1,7 @@
 package com.example.project_terrarium_prm392.ui.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,14 +22,25 @@ import java.util.List;
 import java.util.Locale;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+    private static final String TAG = "CartAdapter";
+
     private final Context context;
-    private final CartItemListener listener;
     private List<CartItem> cartItems;
+    private final CartItemListener listener;
 
     public CartAdapter(Context context, CartItemListener listener) {
         this.context = context;
-        this.listener = listener;
         this.cartItems = new ArrayList<>();
+        this.listener = listener;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
+        notifyDataSetChanged();
+    }
+
+    public List<CartItem> getCartItems() {
+        return cartItems;
     }
 
     @NonNull
@@ -40,8 +52,63 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        CartItem item = cartItems.get(position);
-        holder.bind(item);
+        CartItem cartItem = cartItems.get(position);
+        
+        if (cartItem.getProduct() != null) {
+            // Set product name
+            holder.textViewProductName.setText(cartItem.getProduct().getName());
+            
+            // Set product price
+            String formattedPrice = formatCurrency(cartItem.getProduct().getPrice());
+            holder.textViewPrice.setText(formattedPrice);
+            
+            // Set quantity
+            holder.textViewQuantity.setText(String.valueOf(cartItem.getQuantity()));
+            
+            // Calculate and set subtotal
+            double subtotal = cartItem.getProduct().getPrice() * cartItem.getQuantity();
+            String formattedSubtotal = formatCurrency(subtotal);
+            holder.textViewSubtotal.setText("Tổng: " + formattedSubtotal);
+            
+            // Load product image using Glide
+            if (cartItem.getProduct().getImageUrl() != null && !cartItem.getProduct().getImageUrl().isEmpty()) {
+                Glide.with(context)
+                        .load(cartItem.getProduct().getImageUrl())
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .centerCrop()
+                        .into(holder.imageViewProduct);
+            } else {
+                holder.imageViewProduct.setImageResource(R.drawable.ic_launcher_foreground);
+            }
+
+            // Set click listeners
+            holder.buttonIncreaseQuantity.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onIncreaseQuantity(cartItem);
+                }
+            });
+
+            holder.buttonDecreaseQuantity.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDecreaseQuantity(cartItem);
+                }
+            });
+
+            holder.imageButtonDelete.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onRemoveItem(cartItem);
+                }
+            });
+        } else {
+            // Handle case where product is null
+            holder.textViewProductName.setText("Sản phẩm không tồn tại");
+            holder.textViewPrice.setText("N/A");
+            holder.textViewQuantity.setText("0");
+            holder.textViewSubtotal.setText("Tổng: 0 đ");
+            holder.imageViewProduct.setImageResource(R.drawable.ic_launcher_foreground);
+            Log.e(TAG, "Product is null for CartItem id: " + cartItem.getId());
+        }
     }
 
     @Override
@@ -49,92 +116,34 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         return cartItems.size();
     }
 
-    public void setCartItems(List<CartItem> items) {
-        this.cartItems = items;
-        notifyDataSetChanged();
-    }
-
-    public void updateItem(CartItem updatedItem) {
-        for (int i = 0; i < cartItems.size(); i++) {
-            if (cartItems.get(i).getId() == updatedItem.getId()) {
-                cartItems.set(i, updatedItem);
-                notifyItemChanged(i);
-                break;
-            }
+    public double getTotalPrice() {
+        double total = 0;
+        for (CartItem item : cartItems) {
+            total += item.getSubtotal();
         }
+        return total;
     }
 
-    public void removeItem(CartItem item) {
-        int position = cartItems.indexOf(item);
-        if (position != -1) {
-            cartItems.remove(position);
-            notifyItemRemoved(position);
-        }
+    private String formatCurrency(double amount) {
+        NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        return formatter.format(amount) + " đ";
     }
 
-    public class CartViewHolder extends RecyclerView.ViewHolder {
-        private final ImageView imageProduct;
-        private final TextView textProductName;
-        private final TextView textPrice;
-        private final TextView textQuantity;
-        private final TextView textTotal;
-        private final ImageButton buttonIncrease;
-        private final ImageButton buttonDecrease;
-        private final ImageButton buttonRemove;
+    public static class CartViewHolder extends RecyclerView.ViewHolder {
+        ImageView imageViewProduct;
+        TextView textViewProductName, textViewPrice, textViewQuantity, textViewSubtotal;
+        ImageButton buttonIncreaseQuantity, buttonDecreaseQuantity, imageButtonDelete;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageProduct = itemView.findViewById(R.id.imageProduct);
-            textProductName = itemView.findViewById(R.id.textProductName);
-            textPrice = itemView.findViewById(R.id.textPrice);
-            textQuantity = itemView.findViewById(R.id.textQuantity);
-            textTotal = itemView.findViewById(R.id.textTotal);
-            buttonIncrease = itemView.findViewById(R.id.buttonIncrease);
-            buttonDecrease = itemView.findViewById(R.id.buttonDecrease);
-            buttonRemove = itemView.findViewById(R.id.buttonRemove);
-        }
-
-        public void bind(CartItem item) {
-            // Load product image
-            if (item.getProduct() != null && item.getProduct().getImageUrl() != null) {
-                Glide.with(context)
-                    .load(item.getProduct().getImageUrl())
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_dialog_alert)
-                    .into(imageProduct);
-            } else {
-                imageProduct.setImageResource(android.R.drawable.ic_menu_gallery);
-            }
-
-            // Set product details
-            textProductName.setText(item.getProduct() != null ? item.getProduct().getName() : "Unknown Product");
-            textPrice.setText(formatCurrency(item.getPrice()));
-            textQuantity.setText(String.valueOf(item.getQuantity()));
-            textTotal.setText(formatCurrency(item.getPrice() * item.getQuantity()));
-
-            // Set click listeners
-            buttonIncrease.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onIncreaseQuantity(item);
-                }
-            });
-
-            buttonDecrease.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onDecreaseQuantity(item);
-                }
-            });
-
-            buttonRemove.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onRemoveItem(item);
-                }
-            });
-        }
-
-        private String formatCurrency(double amount) {
-            NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
-            return formatter.format(amount) + " đ";
+            imageViewProduct = itemView.findViewById(R.id.imageViewProduct);
+            textViewProductName = itemView.findViewById(R.id.textViewProductName);
+            textViewPrice = itemView.findViewById(R.id.textViewPrice);
+            textViewQuantity = itemView.findViewById(R.id.textViewQuantity);
+            textViewSubtotal = itemView.findViewById(R.id.textViewSubtotal);
+            buttonIncreaseQuantity = itemView.findViewById(R.id.buttonIncreaseQuantity);
+            buttonDecreaseQuantity = itemView.findViewById(R.id.buttonDecreaseQuantity);
+            imageButtonDelete = itemView.findViewById(R.id.imageButtonDelete);
         }
     }
 
