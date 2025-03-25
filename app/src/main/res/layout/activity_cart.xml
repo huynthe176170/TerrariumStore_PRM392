@@ -49,15 +49,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/layoutCheckout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
+        android:elevation="8dp"
+        app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
@@ -69,32 +68,40 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tổng tiền:"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/textViewTotalPrice"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="end"
-                    android:textColor="@android:color/holo_green_dark"
+                    android:text="0 VNĐ"
+                    android:textColor="@android:color/holo_red_dark"
                     android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <Button
+                android:id="@+id/buttonViewOrders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đơn hàng của tôi"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
                 android:id="@+id/buttonCheckout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Thanh toán"
-                android:textAllCaps="false" />
+                android:layout_marginTop="8dp"
+                android:text="Thanh toán" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -103,9 +110,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout> 

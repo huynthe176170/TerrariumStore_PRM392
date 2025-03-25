@@ -4,7 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Permissions for camera - for future QR code scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    
     <application
+        android:name=".TerrariumApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,7 +22,23 @@
         android:theme="@style/Theme.Project_terrarium_prm392"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:hardwareAccelerated="true"
         tools:targetApi="31">
+        
+        <!-- ZXing Activity for QR Code -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:replace="android:screenOrientation" />
+        
+        <activity
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Thông tin cá nhân" />
         
         <activity
             android:name=".ui.auth.LoginActivity"
@@ -59,6 +82,18 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:label="Thanh toán"/>
+            
+        <activity
+            android:name=".ui.OrderListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Đơn hàng của tôi"/>
+            
+        <activity
+            android:name=".ui.OrderDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Chi tiết đơn hàng"/>
             
     </application>
 

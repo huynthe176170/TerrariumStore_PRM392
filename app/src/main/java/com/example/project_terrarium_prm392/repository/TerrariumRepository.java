@@ -342,11 +342,23 @@ public class TerrariumRepository {
             return;
         }
         
-        apiService.getUserOrders(tokenManager.getAuthorizationHeader()).enqueue(new Callback<List<Order>>() {
+        final int userId = tokenManager.getUserId();
+        
+        apiService.getAllOrders(tokenManager.getAuthorizationHeader()).enqueue(new Callback<List<Order>>() {
             @Override
             public void onResponse(Call<List<Order>> call, Response<List<Order>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    callback.onSuccess(response.body());
+                    List<Order> allOrders = response.body();
+                    List<Order> userOrders = new ArrayList<>();
+                    
+                    // Lọc đơn hàng của người dùng hiện tại
+                    for (Order order : allOrders) {
+                        if (order.getUserId() == userId) {
+                            userOrders.add(order);
+                        }
+                    }
+                    
+                    callback.onSuccess(userOrders);
                 } else {
                     callback.onError("Failed to get orders: " + response.message());
                 }
