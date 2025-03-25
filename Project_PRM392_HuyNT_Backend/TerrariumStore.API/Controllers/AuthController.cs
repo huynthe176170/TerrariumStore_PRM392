@@ -7,6 +7,8 @@ using System.Text;
 using TerrariumStore.API.Data;
 using TerrariumStore.API.DTOs;
 using TerrariumStore.API.Models;
+using Microsoft.AspNetCore.Authorization;
+using AutoMapper;
 
 namespace TerrariumStore.API.Controllers
 {
@@ -16,11 +18,13 @@ namespace TerrariumStore.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
+        private readonly IMapper _mapper;
 
-        public AuthController(AppDbContext context, IConfiguration config)
+        public AuthController(AppDbContext context, IConfiguration config, IMapper mapper)
         {
             _context = context;
             _config = config;
+            _mapper = mapper;
         }
 
         // 1. Đăng ký
@@ -57,6 +61,32 @@ namespace TerrariumStore.API.Controllers
 
             string token = GenerateJwtToken(user);
             return Ok(new { token, user.Id, user.Username, user.Role });
+        }
+
+        // Lấy thông tin profile của người dùng đã đăng nhập
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<ActionResult<UserDTO>> GetProfile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Bạn cần đăng nhập để xem thông tin profile.");
+            }
+
+            int userId;
+            if (!int.TryParse(userIdClaim.Value, out userId))
+            {
+                return BadRequest("Token không hợp lệ.");
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("Không tìm thấy thông tin người dùng.");
+            }
+
+            return Ok(_mapper.Map<UserDTO>(user));
         }
 
         private string GenerateJwtToken(User user)

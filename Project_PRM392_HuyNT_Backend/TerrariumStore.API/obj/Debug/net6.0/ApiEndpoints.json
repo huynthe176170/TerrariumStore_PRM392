@@ -94,6 +94,26 @@
   },
   {
     "ContainingType": "TerrariumStore.API.Controllers.AuthController",
+    "Method": "GetProfile",
+    "RelativePath": "api/Auth/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "TerrariumStore.API.DTOs.UserDTO",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "TerrariumStore.API.Controllers.AuthController",
     "Method": "Register",
     "RelativePath": "api/Auth/register",
     "HttpMethod": "POST",
@@ -938,7 +958,7 @@
         "IsRequired": true
       },
       {
-        "Name": "updateDto",
+        "Name": "userUpdate",
         "Type": "TerrariumStore.API.DTOs.UserUpdateDTO",
         "IsRequired": true
       }
