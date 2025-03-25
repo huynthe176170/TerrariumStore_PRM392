@@ -63,6 +63,11 @@ dependencies {
     implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation ("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
     implementation ("com.google.android.material:material:1.11.0")
+    
+    // Thư viện tạo QR code
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("com.google.zxing:core:3.5.2")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
