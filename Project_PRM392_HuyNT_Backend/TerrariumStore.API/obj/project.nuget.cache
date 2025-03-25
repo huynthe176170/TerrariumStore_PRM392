@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "R1BuNBcgshE=",
+  "dgSpecHash": "o15W1OuhehU=",
   "success": true,
-  "projectFilePath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
+  "projectFilePath": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\huyth\\.nuget\\packages\\automapper\\9.0.0\\automapper.9.0.0.nupkg.sha512",
     "C:\\Users\\huyth\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\7.0.0\\automapper.extensions.microsoft.dependencyinjection.7.0.0.nupkg.sha512",

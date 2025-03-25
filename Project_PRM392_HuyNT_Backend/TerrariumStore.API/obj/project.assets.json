@@ -3286,11 +3286,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
+      "projectUniqueName": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
       "projectName": "TerrariumStore.API",
-      "projectPath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
+      "projectPath": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\TerrariumStore.API.csproj",
       "packagesPath": "C:\\Users\\huyth\\.nuget\\packages\\",
-      "outputPath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\obj\\",
+      "outputPath": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj": {}
+    "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj": {}
   },
   "projects": {
-    "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj": {
+    "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj",
+        "projectUniqueName": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj",
         "projectName": "TerrariumStore.Web",
-        "projectPath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj",
+        "projectPath": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\TerrariumStore.Web.csproj",
         "packagesPath": "C:\\Users\\huyth\\.nuget\\packages\\",
-        "outputPath": "D:\\DOWNLOAD_O_D\\chuyennganh_ki8\\PRM392\\ProjectFinal_PRM392\\Project_PRM_final\\Project_Terrarium_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\obj\\",
+        "outputPath": "E:\\GithubProject_PRM392\\TerrariumStore_PRM392\\Project_PRM392_HuyNT_Backend\\TerrariumStore.Web\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
