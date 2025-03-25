@@ -26,8 +26,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.project_terrarium_prm392.ui.CartActivity
+import com.example.project_terrarium_prm392.ui.OrderListActivity
 import com.example.project_terrarium_prm392.ui.ProductListActivity
 import com.example.project_terrarium_prm392.ui.auth.LoginActivity
+import com.example.project_terrarium_prm392.ui.profile.ProfileActivity
 import com.example.project_terrarium_prm392.ui.theme.Project_terrarium_prm392Theme
 import com.example.project_terrarium_prm392.utils.TokenManager
 
@@ -76,10 +78,30 @@ fun TerrariumApp(modifier: Modifier = Modifier) {
         if (isLoggedIn.value) {
             Button(
                 onClick = {
+                    context.startActivity(Intent(context, ProfileActivity::class.java))
+                }
+            ) {
+                Text("My Profile")
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = {
                     context.startActivity(Intent(context, CartActivity::class.java))
                 }
             ) {
                 Text("View Cart")
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, OrderListActivity::class.java))
+                }
+            ) {
+                Text("My Orders")
             }
             
             Spacer(modifier = Modifier.height(16.dp))
