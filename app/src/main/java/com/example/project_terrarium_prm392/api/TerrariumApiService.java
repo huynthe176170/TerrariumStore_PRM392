@@ -92,13 +92,19 @@ public interface TerrariumApiService {
     
     // Order endpoints
     @GET("order")
-    Call<List<Order>> getUserOrders(@Header("Authorization") String token);
+    Call<List<Order>> getAllOrders(@Header("Authorization") String token);
     
-    @GET("orders/{id}")
+    @GET("order/{id}")
     Call<Order> getOrderById(@Header("Authorization") String token, @Path("id") int orderId);
     
     @POST("order")
     Call<Order> createOrder(@Header("Authorization") String token, @Body Order order);
+    
+    @PUT("order/{id}")
+    Call<Order> updateOrder(@Header("Authorization") String token, @Path("id") int orderId, @Body Order order);
+    
+    @PUT("order/{id}/status")
+    Call<Order> updateOrderStatus(@Header("Authorization") String token, @Path("id") int orderId, @Body String status);
     
     // Payment endpoints
     @POST("payment")

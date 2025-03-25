@@ -60,6 +60,18 @@
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
             android:label="Thanh toán"/>
             
+        <activity
+            android:name=".ui.OrderListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Đơn hàng của tôi"/>
+            
+        <activity
+            android:name=".ui.OrderDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            android:label="Chi tiết đơn hàng"/>
+            
     </application>
 
 </manifest>
