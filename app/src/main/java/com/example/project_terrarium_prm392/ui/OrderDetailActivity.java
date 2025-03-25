@@ -95,8 +95,34 @@ public class OrderDetailActivity extends AppCompatActivity {
         Log.d(TAG, "Token: " + tokenManager.getToken());
         Log.d(TAG, "User ID: " + tokenManager.getUserId());
 
-        initViews();
+        // Ánh xạ các view
+        textOrderId = findViewById(R.id.textOrderId);
+        textOrderDate = findViewById(R.id.textOrderDate);
+        textOrderStatus = findViewById(R.id.textOrderStatus);
+        textShippingAddress = findViewById(R.id.textShippingAddress);
+        textSubtotal = findViewById(R.id.textSubtotal);
+        textShippingFee = findViewById(R.id.textShippingFee);
+        textTotal = findViewById(R.id.textTotal);
+        recyclerViewOrderItems = findViewById(R.id.recyclerViewOrderItems);
+        progressBar = findViewById(R.id.progressBar);
         
+        // Ánh xạ các view QR code
+        imageQRCode = findViewById(R.id.imageQRCode);
+        textPaymentInfo = findViewById(R.id.textPaymentInfo);
+        textAmount = findViewById(R.id.textAmount);
+        buttonPaymentCompleted = findViewById(R.id.buttonPaymentCompleted);
+        
+        // Thiết lập thông tin thanh toán
+        textPaymentInfo.setText(SELLER_NAME + "\n" + SELLER_PHONE);
+        
+        // Thiết lập sự kiện nút "Đã thanh toán"
+        buttonPaymentCompleted.setOnClickListener(v -> {
+            Toast.makeText(OrderDetailActivity.this, "Cảm ơn bạn đã thanh toán! Chúng tôi sẽ xử lý đơn hàng của bạn.", Toast.LENGTH_LONG).show();
+            buttonPaymentCompleted.setEnabled(false);
+            buttonPaymentCompleted.setText("Đã xác nhận thanh toán");
+            // Có thể gọi API để cập nhật trạng thái thanh toán ở đây
+        });
+
         // Cấu hình RecyclerView
         recyclerViewOrderItems.setLayoutManager(new LinearLayoutManager(this));
         orderDetailAdapter = new OrderDetailAdapter(this, new ArrayList<>());
@@ -104,47 +130,6 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         // Load dữ liệu
         fetchOrderDetail();
-    }
-    
-    private void initViews() {
-        try {
-            // Ánh xạ các view
-            textOrderId = findViewById(R.id.textOrderId);
-            textOrderDate = findViewById(R.id.textOrderDate);
-            textOrderStatus = findViewById(R.id.textOrderStatus);
-            textShippingAddress = findViewById(R.id.textShippingAddress);
-            textSubtotal = findViewById(R.id.textSubtotal);
-            textShippingFee = findViewById(R.id.textShippingFee);
-            textTotal = findViewById(R.id.textTotal);
-            recyclerViewOrderItems = findViewById(R.id.recyclerViewOrderItems);
-            progressBar = findViewById(R.id.progressBar);
-            
-            // Ánh xạ các view QR code
-            imageQRCode = findViewById(R.id.imageQRCode);
-            textPaymentInfo = findViewById(R.id.textPaymentInfo);
-            textAmount = findViewById(R.id.textAmount);
-            buttonPaymentCompleted = findViewById(R.id.buttonPaymentCompleted);
-            
-            // Mặc định ẩn phần QR code, chỉ hiển thị khi tạo QR thành công
-            View cardViewQRCode = findViewById(R.id.cardViewQRCode);
-            if (cardViewQRCode != null) {
-                cardViewQRCode.setVisibility(View.GONE);
-            }
-            
-            // Thiết lập thông tin thanh toán
-            textPaymentInfo.setText(SELLER_NAME + "\n" + SELLER_PHONE);
-            
-            // Thiết lập sự kiện nút "Đã thanh toán"
-            buttonPaymentCompleted.setOnClickListener(v -> {
-                Toast.makeText(OrderDetailActivity.this, "Cảm ơn bạn đã thanh toán! Chúng tôi sẽ xử lý đơn hàng của bạn.", Toast.LENGTH_LONG).show();
-                buttonPaymentCompleted.setEnabled(false);
-                buttonPaymentCompleted.setText("Đã xác nhận thanh toán");
-                // Có thể gọi API để cập nhật trạng thái thanh toán ở đây
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Error initializing views", e);
-            Toast.makeText(this, "Lỗi khởi tạo giao diện", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void fetchOrderDetail() {
@@ -197,43 +182,26 @@ public class OrderDetailActivity extends AppCompatActivity {
      * Tạo QR code cho đơn hàng
      */
     private void generateQRCode(Order order) {
-        try {
-            // Hiển thị số tiền
-            double totalAmount = order.getTotalPrice();
-            textAmount.setText(currencyFormat.format(totalAmount));
-            
-            // Tạo nội dung QR code
-            String qrContent = QRCodeGenerator.createPaymentContent(
-                    String.valueOf(order.getId()),
-                    totalAmount,
-                    SELLER_NAME,
-                    SELLER_PHONE
-            );
-            
-            Log.d(TAG, "QR Content: " + qrContent);
-            
-            // Tạo ảnh QR code - đảm bảo kích thước hợp lý
-            int qrSize = 300; // Giảm kích thước xuống
-            Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrContent, qrSize, qrSize);
-            
-            // Hiển thị QR code
-            if (qrBitmap != null) {
-                imageQRCode.setImageBitmap(qrBitmap);
-                
-                // Hiện Card QR Code khi tạo thành công
-                View cardViewQRCode = findViewById(R.id.cardViewQRCode);
-                if (cardViewQRCode != null) {
-                    cardViewQRCode.setVisibility(View.VISIBLE);
-                }
-            } else {
-                Log.e(TAG, "QR bitmap is null");
-                imageQRCode.setVisibility(View.GONE);
-                Toast.makeText(this, "Không thể tạo mã QR", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error generating QR code", e);
-            imageQRCode.setVisibility(View.GONE);
-            Toast.makeText(this, "Lỗi khi tạo mã QR: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        // Hiển thị số tiền
+        double totalAmount = order.getTotalPrice();
+        textAmount.setText(currencyFormat.format(totalAmount));
+        
+        // Tạo nội dung QR code
+        String qrContent = QRCodeGenerator.createPaymentContent(
+                String.valueOf(order.getId()),
+                totalAmount,
+                SELLER_NAME,
+                SELLER_PHONE
+        );
+        
+        // Tạo ảnh QR code
+        Bitmap qrBitmap = QRCodeGenerator.generateQRCode(qrContent, 500, 500);
+        
+        // Hiển thị QR code
+        if (qrBitmap != null) {
+            imageQRCode.setImageBitmap(qrBitmap);
+        } else {
+            Toast.makeText(this, "Không thể tạo mã QR", Toast.LENGTH_SHORT).show();
         }
     }
 
