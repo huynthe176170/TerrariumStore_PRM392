@@ -2,6 +2,7 @@ package com.example.project_terrarium_prm392.api;
 
 import com.example.project_terrarium_prm392.api.request.LoginRequest;
 import com.example.project_terrarium_prm392.api.request.RegisterRequest;
+import com.example.project_terrarium_prm392.api.request.UpdateProfileRequest;
 import com.example.project_terrarium_prm392.api.response.AuthResponse;
 import com.example.project_terrarium_prm392.models.Cart;
 import com.example.project_terrarium_prm392.models.CartItem;
@@ -38,8 +39,10 @@ public interface TerrariumApiService {
     @GET("auth/profile")
     Call<User> getUserProfile(@Header("Authorization") String token);
     
-    @PUT("users/profile")
-    Call<User> updateUserProfile(@Header("Authorization") String token, @Body User user);
+    @PUT("user/{id}")
+    Call<ResponseBody> updateUserProfile(@Header("Authorization") String token, 
+                                      @Path("id") int userId, 
+                                      @Body UpdateProfileRequest request);
     
     // Category endpoints
     @GET("category")
@@ -59,8 +62,8 @@ public interface TerrariumApiService {
         @Query("pageSize") int pageSize
     );
     
-    @GET("product/category/{categoryId}")
-    Call<List<Product>> getProductsByCategory(@Path("categoryId") int categoryId);
+    @GET("product")
+    Call<List<Product>> getProductsByCategory(@Query("categoryId") int categoryId);
     
     @GET("product/{id}")
     Call<Product> getProductById(@Path("id") int productId);
@@ -92,13 +95,19 @@ public interface TerrariumApiService {
     
     // Order endpoints
     @GET("order")
-    Call<List<Order>> getUserOrders(@Header("Authorization") String token);
+    Call<List<Order>> getAllOrders(@Header("Authorization") String token);
     
-    @GET("orders/{id}")
+    @GET("order/{id}")
     Call<Order> getOrderById(@Header("Authorization") String token, @Path("id") int orderId);
     
     @POST("order")
     Call<Order> createOrder(@Header("Authorization") String token, @Body Order order);
+    
+    @PUT("order/{id}")
+    Call<Order> updateOrder(@Header("Authorization") String token, @Path("id") int orderId, @Body Order order);
+    
+    @PUT("order/{id}/status")
+    Call<Order> updateOrderStatus(@Header("Authorization") String token, @Path("id") int orderId, @Body String status);
     
     // Payment endpoints
     @POST("payment")

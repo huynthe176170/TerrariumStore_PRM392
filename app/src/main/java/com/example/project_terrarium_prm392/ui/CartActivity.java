@@ -41,6 +41,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private TextView emptyCartMessage;
     private CardView layoutCheckout;
     private Button buttonCheckout;
+    private Button buttonViewOrders;
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView textViewTotalPrice;
@@ -52,43 +53,53 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
         
-        Log.d(TAG, "CartActivity onCreate");
+        // Khởi tạo Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Giỏ hàng");
         
+        // Khởi tạo TokenManager và kiểm tra đăng nhập
         tokenManager = new TokenManager(this);
-        
         if (!tokenManager.isLoggedIn()) {
-            Toast.makeText(this, "Please login to view cart", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, LoginActivity.class));
+            Toast.makeText(this, "Vui lòng đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
             return;
         }
         
+        // Khởi tạo Repository
+        cartRepository = new CartRepository(this);
+        
+        // Khởi tạo views
         initViews();
+        
+        // Thiết lập RecyclerView
         setupRecyclerView();
+        
+        // Thiết lập SwipeRefresh
         setupSwipeRefresh();
+        
+        // Thiết lập nút checkout
         setupCheckoutButton();
         
-        // Load cart data
+        // Thiết lập nút xem đơn hàng
+        setupViewOrdersButton();
+        
+        // Load giỏ hàng
         loadCart();
     }
 
     private void initViews() {
         recyclerViewCart = findViewById(R.id.recyclerViewCart);
-        progressBar = findViewById(R.id.progressBar);
         emptyCartMessage = findViewById(R.id.emptyCartMessage);
         layoutCheckout = findViewById(R.id.layoutCheckout);
         buttonCheckout = findViewById(R.id.buttonCheckout);
+        buttonViewOrders = findViewById(R.id.buttonViewOrders);
+        progressBar = findViewById(R.id.progressBar);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         textViewTotalPrice = findViewById(R.id.textViewTotalPrice);
-        
-        if (recyclerViewCart == null) {
-            Log.e(TAG, "RecyclerView not found in layout");
-            Toast.makeText(this, "Error initializing cart view", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        cartRepository = new CartRepository(this);
     }
 
     private void setupRecyclerView() {
@@ -103,6 +114,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
     private void setupCheckoutButton() {
         buttonCheckout.setOnClickListener(v -> startCheckout());
+    }
+
+    private void setupViewOrdersButton() {
+        buttonViewOrders.setOnClickListener(view -> {
+            Intent intent = new Intent(CartActivity.this, OrderListActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadCart() {

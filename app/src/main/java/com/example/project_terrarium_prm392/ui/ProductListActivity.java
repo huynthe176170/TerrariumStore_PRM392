@@ -11,140 +11,233 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.project_terrarium_prm392.R;
+import com.example.project_terrarium_prm392.api.ApiClient;
+import com.example.project_terrarium_prm392.api.TerrariumApiService;
+import com.example.project_terrarium_prm392.models.Category;
 import com.example.project_terrarium_prm392.models.Product;
-import com.example.project_terrarium_prm392.repository.TerrariumRepository;
+import com.example.project_terrarium_prm392.ui.adapters.CategoryAdapter;
 import com.example.project_terrarium_prm392.ui.adapters.ProductAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ProductListActivity extends AppCompatActivity implements ProductAdapter.OnProductClickListener {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ProductListActivity extends AppCompatActivity implements ProductAdapter.OnProductClickListener, CategoryAdapter.OnCategoryClickListener {
 
     private static final String TAG = "ProductListActivity";
     private RecyclerView recyclerViewProducts;
-    private ProductAdapter adapter;
+    private RecyclerView recyclerViewCategories;
+    private ProductAdapter productAdapter;
+    private CategoryAdapter categoryAdapter;
     private ProgressBar progressBar;
     private TextView textViewError;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TerrariumApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_product_list);
-        
         try {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_product_list);
+            
+            // Initialize API service
+            apiService = ApiClient.getApiService();
+            
             // Initialize UI components
             Toolbar toolbar = findViewById(R.id.toolbar);
-            toolbar.setTitle("Terrarium Products");
-            // Don't call setSupportActionBar(toolbar) to avoid conflicts
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
             
             recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
+            recyclerViewCategories = findViewById(R.id.recyclerViewCategories);
             swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
             progressBar = findViewById(R.id.progressBar);
             textViewError = findViewById(R.id.textViewError);
             
-            // Setup RecyclerView
-            recyclerViewProducts.setLayoutManager(new GridLayoutManager(this, 2));
-            adapter = new ProductAdapter(this);
-            adapter.setOnProductClickListener(this);
-            recyclerViewProducts.setAdapter(adapter);
+            // Setup RecyclerViews
+            setupRecyclerViews();
+            
+            // Load initial data
+            loadCategories();
+            loadProducts();
             
             // Setup SwipeRefreshLayout
-            swipeRefreshLayout.setOnRefreshListener(this::loadProducts);
-            
-            // Load products
-            loadProducts();
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                // Reload current category or all products
+                if (categoryAdapter.getSelectedPosition() == 0) {
+                    loadProducts();
+                } else {
+                    Category selectedCategory = getCategoryAtPosition(categoryAdapter.getSelectedPosition());
+                    if (selectedCategory != null) {
+                        loadProductsByCategory(selectedCategory.getId());
+                    } else {
+                        loadProducts();
+                    }
+                }
+            });
         } catch (Exception e) {
             Log.e(TAG, "Error initializing ProductListActivity: " + e.getMessage());
             Toast.makeText(this, "Error initializing: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setupRecyclerViews() {
+        // Setup Products RecyclerView
+        productAdapter = new ProductAdapter(this);
+        recyclerViewProducts.setLayoutManager(new GridLayoutManager(this, 2));
+        recyclerViewProducts.setAdapter(productAdapter);
+        
+        // Setup Categories RecyclerView
+        categoryAdapter = new CategoryAdapter(this);
+        recyclerViewCategories.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerViewCategories.setAdapter(categoryAdapter);
+    }
+
+    private void loadCategories() {
+        showLoading(true);
+        apiService.getAllCategories().enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                showLoading(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    categoryAdapter.setCategories(response.body());
+                    // Select "All" category by default
+                    categoryAdapter.selectCategory(0);
+                } else {
+                    showError("Failed to load categories");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                showLoading(false);
+                showError("Network error: " + t.getMessage());
+                Log.e(TAG, "Failed to load categories: " + t.getMessage());
+            }
+        });
+    }
+
     private void loadProducts() {
-        try {
-            progressBar.setVisibility(View.VISIBLE);
-            textViewError.setVisibility(View.GONE);
-            
-            // Log thông tin
-            Log.d(TAG, "Bắt đầu tải danh sách sản phẩm...");
-            
-            // Call the repository to fetch products
-            TerrariumRepository repository = new TerrariumRepository(this);
-            repository.getProducts(new TerrariumRepository.RepositoryCallback<List<Product>>() {
-                @Override
-                public void onSuccess(List<Product> result) {
-                    progressBar.setVisibility(View.GONE);
-                    swipeRefreshLayout.setRefreshing(false);
-                    
-                    Log.d(TAG, "Tải sản phẩm thành công, số lượng: " + (result != null ? result.size() : 0));
-                    
-                    if (result != null && !result.isEmpty()) {
-                        adapter.setProducts(result);
-                        
-                        // Ẩn lỗi nếu có
-                        textViewError.setVisibility(View.GONE);
-                    } else {
-                        // Trong trường hợp API trả về danh sách rỗng, hiển thị thông báo
-                        textViewError.setText("Không có sản phẩm nào");
-                        textViewError.setVisibility(View.VISIBLE);
-                        
-                        // Vẫn load sample data nếu API không có dữ liệu
-                        adapter.setProducts(createSampleProducts());
-                    }
+        showLoading(true);
+        apiService.getAllProducts().enqueue(new Callback<List<Product>>() {
+            @Override
+            public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    productAdapter.setProducts(response.body());
+                    showError(false);
+                } else {
+                    showError("Failed to load products");
                 }
+            }
+
+            @Override
+            public void onFailure(Call<List<Product>> call, Throwable t) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
+                showError("Network error: " + t.getMessage());
+                Log.e(TAG, "Failed to load products: " + t.getMessage());
+            }
+        });
+    }
+
+    private void loadProductsByCategory(int categoryId) {
+        showLoading(true);
+        Log.d(TAG, "Loading products for category ID: " + categoryId);
+        
+        apiService.getProductsByCategory(categoryId).enqueue(new Callback<List<Product>>() {
+            @Override
+            public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
                 
-                @Override
-                public void onError(Exception e) {
-                    Log.e(TAG, "Lỗi API: " + e.getMessage(), e);
-                    progressBar.setVisibility(View.GONE);
-                    swipeRefreshLayout.setRefreshing(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Product> products = response.body();
+                    Log.d(TAG, "Loaded " + products.size() + " products for category ID: " + categoryId);
                     
-                    // Hiển thị thông báo lỗi với một phần là lời khuyên
-                    textViewError.setVisibility(View.VISIBLE);
-                    textViewError.setText("Lỗi kết nối API: " + e.getMessage() + 
-                                        "\n\nHiển thị dữ liệu mẫu thay thế");
+                    productAdapter.setProducts(products);
                     
-                    // Load sample data in case of error
-                    List<Product> sampleProducts = createSampleProducts();
-                    adapter.setProducts(sampleProducts);
+                    if (products.isEmpty()) {
+                        showError("Không có sản phẩm nào trong danh mục này");
+                    } else {
+                        showError(false);
+                    }
+                } else {
+                    int errorCode = response.code();
+                    String errorBody = "";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorBody = response.errorBody().string();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error reading error body: " + e.getMessage());
+                    }
                     
-                    // Hiển thị toast thông báo ngắn
-                    Toast.makeText(ProductListActivity.this, 
-                                "Hiển thị dữ liệu mẫu do lỗi kết nối API", 
-                                Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "API error: " + errorCode + " - " + errorBody);
+                    showError("Không thể tải sản phẩm cho danh mục này (Mã lỗi: " + errorCode + ")");
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(Call<List<Product>> call, Throwable t) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
+                Log.e(TAG, "Network error when loading products by category: " + t.getMessage(), t);
+                showError("Lỗi kết nối: " + t.getMessage());
+            }
+        });
+    }
+
+    private Category getCategoryAtPosition(int position) {
+        if (position <= 0) {
+            return null; // "All" category
+        } 
+        
+        try {
+            // Get the adjusted position (subtract 1 for the "All" category)
+            return getCategoryFromAdapter(position - 1);
         } catch (Exception e) {
-            Log.e(TAG, "Lỗi trong loadProducts: " + e.getMessage(), e);
-            progressBar.setVisibility(View.GONE);
-            swipeRefreshLayout.setRefreshing(false);
-            textViewError.setVisibility(View.VISIBLE);
-            textViewError.setText("Lỗi: " + e.getMessage());
-            
-            // Vẫn hiển thị dữ liệu mẫu ngay cả khi có lỗi
-            adapter.setProducts(createSampleProducts());
+            Log.e(TAG, "Error getting category at position: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    private Category getCategoryFromAdapter(int position) {
+        try {
+            // This method assumes the CategoryAdapter has a way to get a Category at a specific position
+            // If your adapter doesn't have this method, you might need to add it
+            List<Category> categories = ((CategoryAdapter)recyclerViewCategories.getAdapter()).getCategories();
+            if (categories != null && position >= 0 && position < categories.size()) {
+                return categories.get(position);
+            }
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting category from adapter: " + e.getMessage());
+            return null;
         }
     }
 
-    private List<Product> createSampleProducts() {
-        List<Product> products = new ArrayList<>();
-        
-        for (int i = 1; i <= 10; i++) {
-            Product product = new Product();
-            product.setId(i);
-            product.setName("Terrarium Plant " + i);
-            product.setPrice(10.99 + i);
-            product.setDescription("Beautiful plant for your terrarium. Perfect for small spaces.");
-            product.setStockQuantity(10 + i);
-            product.setCategoryId(1);
-            products.add(product);
-        }
-        
-        return products;
+    private void showLoading(boolean isLoading) {
+        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void showError(String message) {
+        showError(true);
+        textViewError.setText(message);
+    }
+
+    private void showError(boolean show) {
+        textViewError.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -153,5 +246,23 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
         Intent intent = new Intent(this, ProductDetailActivity.class);
         intent.putExtra(ProductDetailActivity.EXTRA_PRODUCT_ID, product.getId());
         startActivity(intent);
+    }
+
+    @Override
+    public void onCategoryClick(Category category, int position) {
+        if (position == 0) {
+            // "All" category was selected
+            loadProducts();
+        } else if (category != null) {
+            // A specific category was selected
+            Toast.makeText(this, "Selected category: " + category.getName(), Toast.LENGTH_SHORT).show();
+            loadProductsByCategory(category.getId());
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 } 

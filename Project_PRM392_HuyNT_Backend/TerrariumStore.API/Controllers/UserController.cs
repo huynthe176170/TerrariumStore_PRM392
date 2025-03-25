@@ -39,39 +39,75 @@ namespace TerrariumStore.API.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound("Người dùng không tồn tại.");
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            // Kiểm tra xem người dùng đã đăng nhập chưa
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = User.FindFirst(ClaimTypes.Role);
+            
+            // Nếu không có claims (chưa đăng nhập hoặc token không hợp lệ)
+            if (userIdClaim == null)
+            {
+                return Unauthorized("Không có quyền truy cập, vui lòng đăng nhập.");
+            }
 
+            int userId;
+            if (!int.TryParse(userIdClaim.Value, out userId))
+            {
+                return BadRequest("Token không hợp lệ.");
+            }
+            
+            var userRole = userRoleClaim?.Value;
+
+            // Kiểm tra quyền truy cập: chỉ Admin hoặc chính chủ mới được xem
             if (userId != id && userRole != "Admin")
-                return Forbid();
+            {
+                return Forbid("Bạn không có quyền xem thông tin của người dùng khác.");
+            }
 
             return Ok(_mapper.Map<UserDTO>(user));
         }
 
-        // Cập nhật thông tin user (Chỉ user tự cập nhật hoặc admin)
+        // Chỉnh sửa thông tin người dùng (Chỉ admin hoặc chính chủ)
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateDTO updateDto)
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateDTO userUpdate)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound("Người dùng không tồn tại.");
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-            if (userId != id && userRole != "Admin")
-                return Forbid();
-
-            user.FullName = updateDto.FullName;
-            user.Email = updateDto.Email;
-            user.Phone = updateDto.Phone;
-            user.Address = updateDto.Address;
-
-            if (!string.IsNullOrEmpty(updateDto.NewPassword))
+            // Kiểm tra xem người dùng đã đăng nhập chưa
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userRoleClaim = User.FindFirst(ClaimTypes.Role);
+            
+            // Nếu không có claims (chưa đăng nhập hoặc token không hợp lệ)
+            if (userIdClaim == null)
             {
-                if (!string.IsNullOrEmpty(updateDto.CurrentPassword) && !BCrypt.Net.BCrypt.Verify(updateDto.CurrentPassword, user.PasswordHash))
+                return Unauthorized("Không có quyền truy cập, vui lòng đăng nhập.");
+            }
+
+            int userId;
+            if (!int.TryParse(userIdClaim.Value, out userId))
+            {
+                return BadRequest("Token không hợp lệ.");
+            }
+            
+            var userRole = userRoleClaim?.Value;
+
+            // Kiểm tra quyền truy cập: chỉ Admin hoặc chính chủ mới được chỉnh sửa
+            if (userId != id && userRole != "Admin")
+            {
+                return Forbid("Bạn không có quyền chỉnh sửa thông tin của người dùng khác.");
+            }
+
+            user.FullName = userUpdate.FullName;
+            user.Email = userUpdate.Email;
+            user.Phone = userUpdate.Phone;
+            user.Address = userUpdate.Address;
+
+            if (!string.IsNullOrEmpty(userUpdate.NewPassword))
+            {
+                if (!string.IsNullOrEmpty(userUpdate.CurrentPassword) && !BCrypt.Net.BCrypt.Verify(userUpdate.CurrentPassword, user.PasswordHash))
                     return BadRequest("Mật khẩu cũ không đúng.");
 
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.NewPassword);
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userUpdate.NewPassword);
             }
 
             await _context.SaveChangesAsync();
